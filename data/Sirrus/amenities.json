@@ -1,0 +1,129 @@
+{
+  "amenities": [
+    {
+      "category_id": 20020,
+      "category": "Overview",
+      "items": [
+        {
+          "amenity_id": 1002,
+          "title": "Entrance",
+          "icon": "Entrance"
+        },
+        {
+          "amenity_id": 1003,
+          "title": "Entry Plaza",
+          "icon": "Entrance Plaza"
+        },
+        {
+          "amenity_id": 1004,
+          "title": "Event Lawn",
+          "icon": "Party"
+        },
+        {
+          "amenity_id": 1006,
+          "title": "Cycling Track",
+          "icon": "Cycling"
+        },
+        {
+          "amenity_id": 10011,
+          "title": "Forest",
+          "icon": "Forest"
+        },
+  {
+          "amenity_id": 10010,
+          "title": "Meditation Zone",
+          "icon": "Meditation"
+        },
+  {
+          "amenity_id": 2002,
+          "title": "Meadows",
+          "icon": "Meadows"
+        },
+            {
+          "amenity_id": 1008,
+          "title": "Kids Play",
+          "icon": "Kid’s Play"
+        },
+ {
+          "amenity_id": 2003,
+          "title": "Elder Seating",
+          "icon": "Elder Seating"
+        },
+   {
+          "amenity_id": 2005,
+          "title": "Lakeside Deck",
+          "icon": "Lake Side"
+        },
+  {
+          "amenity_id": 2004,
+          "title": "Water Body",
+          "icon": "Water Body"
+        },
+     
+        {
+          "amenity_id": 2006,
+          "title": "Islands",
+          "icon": "Island"
+        },
+  {
+          "amenity_id": 2008,
+          "title": "Party Lawn",
+          "icon": "Party Lawn"
+        },
+ 
+    {
+          "amenity_id": 2007,
+          "title": "Kids Play",
+          "icon": "Kid’s Play"
+        },
+
+
+        {
+          "amenity_id": 1007,
+          "title": "Pet Park",
+          "icon": "Pet Park"
+        }
+    
+      ]
+    },
+    
+    {
+      "category_id": 3002,
+      "category": "Clubhouse",
+      "items": [
+        {
+          "amenity_id": 3001,
+          "title": "Pool",
+          "icon": "Floating Body"
+        }
+      ]
+    } ,
+    {
+      "category_id": 4001,
+      "category": "Sports Area",
+      "items": [
+        {
+          "amenity_id": 4002,
+          "title": "Tennis court",
+          "icon": "Floating Body"
+        },
+
+        {
+          "amenity_id": 4003,
+          "title": "Cricket net",
+          "icon": "Floating Body"
+        },
+        {
+          "amenity_id": 4004,
+          "title": "Pickleball",
+          "icon": "Floating Body"
+        },
+         {
+          "amenity_id": 4005,
+          "title": "Basketball court",
+          "icon": "Floating Body"
+        }
+      ]
+    }
+  ]
+}

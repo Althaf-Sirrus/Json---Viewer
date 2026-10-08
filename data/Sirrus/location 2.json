@@ -1,0 +1,356 @@
+[
+  {
+    "category": "Education",
+    "category_id": 100,
+    "color": "(R=1,G=1,B=1,A=1)",
+    "icon": "🏫",
+    "items": [
+      {
+        "id": 1,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "EuroKids Preschool",
+        "lat": 28.405,
+        "lon": 76.953,
+        "unit": "~ km",
+        "markerHeight": 6000,
+        "poleWidth": 10,
+        "distance": 1.22
+      },
+      {
+        "id": 2,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Delhi Public School",
+        "lat": 28.406,
+        "lon": 76.961,
+        "unit": "~ km",
+        "markerHeight": 20000,
+        "poleWidth": 10,
+        "distance": 1.79
+      },
+      {
+        "id": 3,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "RPS International School",
+        "lat": 28.413,
+        "lon": 76.942,
+        "unit": "~ km",
+        "markerHeight": 14000,
+        "poleWidth": 10,
+        "distance": 1.89
+      },
+      {
+        "id": 4,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "St. Xaviers High School",
+        "lat": 28.416,
+        "lon": 76.945,
+        "unit": "~ km",
+        "markerHeight": 19000,
+        "poleWidth": 10,
+        "distance": 2.22
+      }
+    ]
+  },
+  {
+    "category": "Healthcare",
+    "category_id": 101,
+    "color": "(R=1,G=1,B=1,A=1)",
+    "icon": "🏥",
+    "items": [
+      {
+        "id": 5,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Miracles Apollo Cradle / Spectra",
+        "lat": 28.392,
+        "lon": 76.953,
+        "unit": "~ km",
+        "markerHeight": 6000,
+        "poleWidth": 10,
+        "distance": 0.79
+      },
+      {
+        "id": 6,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Silver Streaks Hospital",
+        "lat": 28.399,
+        "lon": 76.930,
+        "unit": "~ km",
+        "markerHeight": 8000,
+        "poleWidth": 10,
+        "distance": 1.64
+      },
+      {
+        "id": 7,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Aarvy Healthcare Super Specialty Hospital",
+        "lat": 28.413,
+        "lon": 76.941,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": 1.89
+      },
+      {
+        "id": 8,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "MET Hospital",
+        "lat": 28.380,
+        "lon": 76.963,
+        "unit": "~ km",
+        "markerHeight": 12000,
+        "poleWidth": 10,
+        "distance": 2.41
+      },
+      {
+        "id": 9,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Fortis Manesar",
+        "lat": 28.367,
+        "lon": 76.932,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": 3.56
+      }
+    ]
+  },
+  {
+    "category": "Shopping",
+    "category_id": 102,
+    "color": "(R=1,G=1,B=1,A=1)",
+    "icon": "🛍️",
+    "items": [
+      {
+        "id": 10,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "SS Omnia",
+        "lat": 28.401,
+        "lon": 76.946,
+        "unit": "~ km",
+        "markerHeight": 5000,
+        "poleWidth": 10,
+        "distance": 0.53
+      },
+      {
+        "id": 11,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Iris Broadway",
+        "lat": 28.40,
+        "lon": 76.948,
+        "unit": "~ km",
+        "markerHeight": 10000,
+        "poleWidth": 10,
+        "distance": 0.71
+      },
+      {
+        "id": 12,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Sapphire 83",
+        "lat": 28.406,
+        "lon": 76.938,
+        "unit": "~ km",
+        "markerHeight": 20000,
+        "poleWidth": 10,
+        "distance": 1.2
+      },
+      {
+        "id": 13,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Sapphire 90",
+        "lat": 28.404,
+        "lon": 76.936,
+        "unit": "~ km",
+        "markerHeight": 25000,
+        "poleWidth": 10,
+        "distance": 1.3
+      },
+      {
+        "id": 14,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Felix Plaza",
+        "lat": 28.383,
+        "lon": 76.967,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": 2.5
+      },
+      {
+        "id": 15,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Elan Miracle",
+        "lat": 28.416,
+        "lon": 76.964,
+        "unit": "~ km",
+        "markerHeight": 21000,
+        "poleWidth": 10,
+        "distance": 2.7
+      }
+    ]
+  },
+
+  {
+    "category": "Transport",
+    "category_id": 103,
+    "color": "(R=1,G=1,B=1,A=1)",
+    "icon": "🛣️",
+    "items": [
+      {
+        "id": 19,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Dwaraka Expressway",
+        "lat": 28.418,
+        "lon": 76.964,
+        "unit": "~ km",
+        "markerHeight": 7000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 20,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Cloverleaf Interchange",
+        "lat": 28.407,
+        "lon": 76.990,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 21,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Central Peripheral Road",
+        "lat": 28.412,
+        "lon": 76.979,
+        "unit": "~ km",
+        "markerHeight": 9000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 22,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "IGI Airport",
+        "lat": 28.556,
+        "lon": 77.09,
+        "unit": "~ km",
+        "markerHeight": 8000,
+        "poleWidth": 10,
+        "distance": 23
+      },
+ {
+        "id": 23,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Delhi Jaipur Expressway",
+        "lat": 28.379,
+        "lon": 76.961,
+        "unit": "~ km",
+        "markerHeight": 7000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 24,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Dwaraka Expy Link Road",
+        "lat": 28.400,
+        "lon": 76.962,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 25,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Pataudi Road",
+        "lat": 28.427,
+        "lon": 76.945,
+        "unit": "~ km",
+        "markerHeight": 9000,
+        "poleWidth": 10,
+        "distance": null
+      },
+      {
+        "id": 26,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Airport Road",
+        "lat": 28.443,
+        "lon": 77.960,
+        "unit": "~ km",
+        "markerHeight": 8000,
+        "poleWidth": 10,
+        "distance": null
+      }
+
+
+
+
+
+    ]
+  },
+  {
+    "category": "Commercial Hubs",
+    "category_id": 105,
+    "color": "(R=1,G=1,B=1,A=1)",
+    "icon": "🏢",
+    "items": [
+      {
+        "id": 27,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "IMT Manesar",
+        "lat": 28.37,
+        "lon": 76.905,
+        "unit": "~ km",
+        "markerHeight": 15000,
+        "poleWidth": 10,
+        "distance": 4.92
+      },
+      {
+        "id": 28,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Corporate Greens",
+        "lat": 28.401,
+        "lon": 76.99,
+        "unit": "~ km",
+        "markerHeight": 8000,
+        "poleWidth": 10,
+        "distance": 5.07
+      },
+      {
+        "id": 29,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "American Express",
+        "lat": 28.403,
+        "lon": 77.00,
+        "unit": "~ km",
+        "markerHeight": 12000,
+        "poleWidth": 10,
+        "distance": 5.52
+      },
+      {
+        "id": 30,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Udyog Vihar Phase 4",
+        "lat": 28.50,
+        "lon": 77.069,
+        "unit": "~ km",
+        "markerHeight": 6000,
+        "poleWidth": 10,
+        "distance": 16.8
+      },
+      {
+        "id": 31,
+        "color": "(R=1,G=1,B=1,A=1)",
+        "name": "Cyber City",
+        "lat": 28.496,
+        "lon": 77.0930,
+        "unit": "~ km",
+        "markerHeight": 11000,
+        "poleWidth": 10,
+        "distance": 17.5
+      }
+    ]
+  }
+]

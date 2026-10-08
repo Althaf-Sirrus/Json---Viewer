@@ -1,0 +1,1322 @@
+{
+    "amenities": [
+        {
+            "category_id": 40011,
+            "category": "Tower D",
+            "sub_category": [
+                {
+                    "sub_category_id": 1,
+                    "amenity_id": 400140,
+                    "title": "Lobby",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Lobby 1",
+                            "icon": "Lobby",
+                            "amenity_id": 40012
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Lobby 2",
+                            "icon": "Lobby",
+                            "amenity_id": 40013
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Lobby 3",
+                            "icon": "Lobby",
+                            "amenity_id": 40014
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Stilt View",
+                            "icon": "Lobby",
+                            "amenity_id": 400139
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 2,
+                    "amenity_id": 40015,
+                    "title": "City facing",
+                    "items": [
+                        
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Balcony",
+                            "amenity_id": 400144
+                        },   {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Balcony",
+                            "amenity_id": 40015
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Balcony",
+                            "amenity_id": 40016
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Balcony",
+                            "amenity_id": 40017
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 34",
+                            "icon": "Balcony",
+                            "amenity_id": 40018
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 3,
+                    "amenity_id": 40019,
+                    "title": "Green Facing",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Balcony",
+                            "amenity_id": 400145
+                        },
+                          {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Balcony",
+                            "amenity_id": 40019
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Balcony",
+                            "amenity_id": 400110
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Balcony",
+                            "amenity_id": 400111
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 32",
+                            "icon": "Balcony",
+                            "amenity_id": 400112
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 4,
+                    "amenity_id": 400113,
+                    "title": "D - 2701",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400114
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400160
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400149
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400116
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400161
+                        },
+                        
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400147
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400117
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400162
+                        },
+                     
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400148
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400115
+                        },
+                         
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400146
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400163
+                        }
+                       
+                    ]
+                },
+                {
+                    "sub_category_id": 5,
+                    "amenity_id": 400118,
+                    "title": "D - 2702",
+                                                                    "icon": "Unit",
+
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400119
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400120
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Dining",
+                            "icon": "Dining",
+                            "amenity_id": 400121
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400122
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400125
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400142
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400126
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400127
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400143
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400128
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400123
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400141
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400124
+                        }
+                        
+                        
+                    ]
+                },
+                {
+                    "sub_category_id": 6,
+                    "amenity_id": 400129,
+                    "title": "D - 2703",
+
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living ",
+                            "icon": "Living Room",
+                            "amenity_id": 400130
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400168
+                        },
+                      {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400153
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedrooom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400132
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400169
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400151
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400133
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400152
+                        }, 
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400170
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400131
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400150
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400171
+                        }
+                        
+                    ]
+                },
+                {
+                    "sub_category_id": 7,
+                    "amenity_id": 400134,
+
+                    "title": "D - 2704",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living ",
+                            "icon": "Living Room",
+                            "amenity_id": 400135
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400167
+                        },
+                       {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400156
+                        },
+                        
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedrooom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400137
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400154
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400166
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400138
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400165
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400155
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400136
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400157
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400164
+                        }
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "category_id": 40021,
+            "category": "Tower E",
+            "sub_category": [
+                {
+                    "sub_category_id": 1,
+                    "amenity_id": 40022,
+                    "title": "Lobby",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Stilt View",
+                            "icon": "Lobby",
+                            "amenity_id": 40023
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 2,
+                    "amenity_id": 40024,
+                    "title": "Green Facing",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400230
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40024
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40025
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 40026
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 39",
+                            "icon": "Lobby",
+                            "amenity_id": 40027
+                        }
+                    ]
+                },
+                 {
+                    "sub_category_id": 3,
+                    "amenity_id": 40028,
+                    "title": "City facing",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400231
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40028
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40029
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 400210
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 36",
+                            "icon": "Lobby",
+                            "amenity_id": 400211
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "category_id": 40031,
+            "category": "Tower F",
+            "sub_category": [
+                {
+                    "sub_category_id": 1,
+                    "amenity_id": 40032,
+                    "title": "Lobby",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Stilt View",
+                            "icon": "Lobby",
+                            "amenity_id": 40033
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 2,
+                    "amenity_id": 40034,
+                    "title": "Green Facing",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400340
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40034
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40035
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 40036
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 39",
+                            "icon": "Lobby",
+                            "amenity_id": 40037
+                        }
+                    ]
+                },
+                 {
+                    "sub_category_id": 3,
+                    "amenity_id": 40038,
+                    "title": "City Facing",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400341
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40038
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40039
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 400310
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 36",
+                            "icon": "Lobby",
+                            "amenity_id": 400311
+                        }
+                    ]
+                },
+                 {
+                    "sub_category_id": 4,
+                    "amenity_id": 400312,
+                    "title": "F - 2701",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400313
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400376
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400344
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400316
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400377
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400342
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400315
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400378
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400314
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400343
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400379
+                        }
+                        
+                      
+                       
+                        
+                    ]
+                }, {
+                    "sub_category_id": 5,
+                    "amenity_id": 400317,
+                    "title": "F - 2702",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400318
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400380
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400346
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400321
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400381
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400345
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400320
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400382
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400319
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400383
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400347
+                        }
+                        
+
+                       
+                    ]
+                }, {
+                    "sub_category_id": 6,
+                    "amenity_id": 400322,
+                    "title": "F - 2703",
+                                                                    "icon": "Unit",
+
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400323
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400384
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Dining",
+                            "icon": "Dining",
+                            "amenity_id": 400325
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400326
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400329
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400385
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400339
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400331
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400386
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400327
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathrrom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400338
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400387
+                        }
+                        
+                         
+                        
+    
+                    ]
+                }, {
+                    "sub_category_id": 7,
+                    "amenity_id": 400333,
+                    "title": "F - 2704",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Living",
+                            "icon": "Living Room",
+                            "amenity_id": 400334
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400372
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Kitchen",
+                            "icon": "Kitchen",
+                            "amenity_id": 400349
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 3",
+                            "icon": "Bedroom",
+                            "amenity_id": 400337
+                        },
+                         {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400373
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400348
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 2",
+                            "icon": "Bedroom",
+                            "amenity_id": 400336
+                        },
+                       
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400374
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bedroom 1",
+                            "icon": "Bedroom",
+                            "amenity_id": 400335
+                        },
+                    {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Bathroom",
+                            "icon": "Bathroom",
+                            "amenity_id": 400350
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Balcony",
+                            "icon": "Balcony",
+                            "amenity_id": 400375
+                        }
+                        
+                       
+                    ]
+                }
+            ]
+        },
+        {
+            "category_id": 40041,
+            "category": "Tower G",
+            "sub_category": [
+                {
+                    "sub_category_id": 1,
+                    "amenity_id": 40042,
+                    "title": "Lobby",
+                    "items": [
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Stilt View",
+                            "icon": "Lobby",
+                            "amenity_id": 40043
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 2,
+                    "amenity_id": 40044,
+                    "title": "Green Facing",
+                    "items": [
+                          {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400412
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40044
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40045
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 40046
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 39",
+                            "icon": "Lobby",
+                            "amenity_id": 40047
+                        }
+                    ]
+                },
+                {
+                    "sub_category_id": 3,
+                    "amenity_id": 40048,
+                    "title": "City Facing",
+                    "items": [
+                          {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 1",
+                            "icon": "Lobby",
+                            "amenity_id": 400413
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 10",
+                            "icon": "Lobby",
+                            "amenity_id": 40048
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 20",
+                            "icon": "Lobby",
+                            "amenity_id": 40049
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 30",
+                            "icon": "Lobby",
+                            "amenity_id": 400410
+                        },
+                        {
+                            "sub_items": [
+                                ""
+                            ],
+                            "title": "Floor 36",
+                            "icon": "Lobby",
+                            "amenity_id": 400411
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

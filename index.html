@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Unreal Data Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky toolbar over a single working column; tree rows read like an engine details panel (key left, control right). */
+:root {
+  --bg: #eef1f4; --surface: #ffffff; --surface-2: #f6f8fa; --fg: #16202b; --muted: #5a6777;
+  --line: #d9e0e7; --accent: #0e7383; --accent-fg: #ffffff; --accent-soft: #dcf0f2;
+  --changed: #b9770e; --changed-soft: #fbf0dc; --danger: #b8402c; --danger-soft: #f8e3df;
+  --t-str: #2f7a3b; --t-num: #2b5fb8; --t-bool: #7b4bb0; --t-null: #7a7f87;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171d; --surface: #1a2028; --surface-2: #20272f; --fg: #e3e8ee; --muted: #93a0ae;
+  --line: #2e3742; --accent: #3fb3c3; --accent-fg: #0b1a1d; --accent-soft: #163a40;
+  --changed: #e3a43c; --changed-soft: #3a2d14; --danger: #e5735e; --danger-soft: #3d201b;
+  --t-str: #7cc98a; --t-num: #7fa9f0; --t-bool: #c09be8; --t-null: #8b919a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12171d; --surface: #1a2028; --surface-2: #20272f; --fg: #e3e8ee; --muted: #93a0ae;
+  --line: #2e3742; --accent: #3fb3c3; --accent-fg: #0b1a1d; --accent-soft: #163a40;
+  --changed: #e3a43c; --changed-soft: #3a2d14; --danger: #e5735e; --danger-soft: #3d201b;
+  --t-str: #7cc98a; --t-num: #7fa9f0; --t-bool: #c09be8; --t-null: #8b919a; color-scheme: dark }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.brand { display: flex; flex-direction: column; min-width: 0; flex: 1 1 220px; }
+.brand h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .01em; }
+.file { font-family: var(--font-data); font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; gap: 8px; align-items: center; }
+.pill { font-family: var(--font-ui); font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill.example { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.pill.dirty { background: var(--changed-soft); color: var(--changed); border-color: transparent; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: var(--radius); font-size: 13px; font-weight: 500; }
+.btn:hover { background: var(--surface-2); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.btn.primary:hover { filter: brightness(1.06); }
+
+main { max-width: 1100px; margin: 0 auto; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 12px; }
+.banner { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-radius: var(--radius); background: var(--accent-soft); color: var(--fg); font-size: 13px; }
+.banner.err { background: var(--danger-soft); }
+.banner .grow { flex: 1 1 260px; min-width: 0; }
+.banner code { font-family: var(--font-data); font-size: 12px; }
+
+.project { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.proj-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.proj-id { display: flex; gap: 10px; align-items: flex-start; min-width: 0; flex: 1 1 260px; color: var(--accent); }
+.proj-id svg { flex: none; margin-top: 14px; }
+.proj-text { min-width: 0; color: var(--fg); }
+.eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.proj-name { font-size: 18px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.recent { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 99px; padding: 3px 12px; font-size: 12.5px; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.card { text-align: left; display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); min-width: 0; }
+.card:hover { border-color: var(--accent); }
+.card[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.card .ic { flex: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+.card[aria-current="true"] .ic { background: var(--surface); }
+.card .meta { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.card .t { font-weight: 600; font-size: 14px; }
+.card .f { font-family: var(--font-data); font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .s { font-size: 12.5px; color: var(--muted); }
+.card .s.bad { color: var(--danger); }
+.card .s.dirty { color: var(--changed); font-weight: 500; }
+.brand h1 { display: flex; align-items: center; gap: 8px; }
+.logo { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--accent-fg); display: inline-grid; place-items: center; flex: none; }
+.cloudrow { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.cloudrow .tag { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 5px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.liveurl { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 8px 10px; border-radius: var(--radius); background: var(--surface-2); }
+.liveurl code { font-family: var(--font-data); font-size: 12px; overflow-wrap: anywhere; min-width: 0; }
+.fld { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 500; flex: 1 1 160px; }
+.fld input { padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); font-weight: 400; }
+.fld2 { display: flex; flex-wrap: wrap; gap: 10px; }
+.modal-card.help { max-height: calc(100vh - 32px); overflow: auto; }
+.help-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.help-body { font-size: 13.5px; line-height: 1.55; max-width: 68ch; }
+.help-body h3 { font-size: 13px; margin: 14px 0 4px; color: var(--accent); }
+.help-body ol, .help-body ul { padding-left: 20px; margin: 4px 0; display: flex; flex-direction: column; gap: 4px; }
+.help-body code { font-family: var(--font-data); font-size: 12px; background: var(--surface-2); padding: 1px 4px; border-radius: 3px; overflow-wrap: anywhere; }
+
+/* Categories view: list on the left, the selected category on the right. */
+.tips { background: var(--accent-soft); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.tips-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); }
+.tips ul { margin: 0; padding-left: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 4px 24px; }
+.cat-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 12px; align-items: start; }
+.cat-list { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 2px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); max-height: calc(100vh - 90px); overflow: auto; }
+.cat-list .eyebrow { padding: 4px 8px 6px; }
+.cat-item { display: flex; gap: 10px; align-items: center; padding: 8px; border: 0; background: none; border-radius: 6px; text-align: left; border-left: 3px solid transparent; }
+.cat-item:hover { background: var(--surface-2); }
+.cat-item[aria-current="true"] { background: var(--accent-soft); border-left-color: var(--accent); }
+.cat-item.changed .cat-name::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--changed); margin-left: 6px; vertical-align: middle; }
+.cat-badge { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--surface-2); font-size: 17px; font-weight: 600; color: var(--accent); flex: none; }
+.cat-item[aria-current="true"] .cat-badge { background: var(--surface); }
+.cat-txt { display: flex; flex-direction: column; min-width: 0; }
+.cat-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-sub { font-size: 12px; color: var(--muted); }
+.cat-new { margin-top: 6px; border: 1px dashed var(--accent); color: var(--accent); background: none; border-radius: 6px; padding: 8px; font-weight: 600; font-size: 13px; }
+.cat-new:hover { background: var(--accent-soft); }
+.cat-detail { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.cat-title { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; }
+.cat-title h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; min-width: 0; overflow-wrap: anywhere; }
+.cat-title .cat-badge { width: 40px; height: 40px; font-size: 21px; }
+.cat-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn.danger:hover { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+.sect h3 { margin: 0 0 2px; font-size: 14px; }
+.sect > .hint { margin: 0 0 8px; }
+.form { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr); gap: 10px 16px; align-items: start; }
+.form .lab { display: flex; flex-direction: column; padding-top: 4px; }
+.form .lab b { font-weight: 500; }
+.form .lab span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.form .ctl { display: flex; gap: 6px; align-items: center; min-width: 0; padding: 2px 0; border-left: 3px solid transparent; padding-left: 6px; }
+.form .ctl.changed { border-left-color: var(--changed); }
+.form .ctl .v.num { max-width: 200px; }
+.sect .tree { padding: 0; min-width: 0; }
+.sect .tablewrap { padding-left: 0; padding-right: 0; }
+details.cols { font-size: 12.5px; color: var(--muted); }
+details.cols summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+details.cols dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 12px; margin: 6px 0 0; }
+details.cols dt { font-family: var(--font-data); color: var(--fg); }
+details.cols dd { margin: 0; }
+@media (max-width: 760px) {
+  .cat-layout { grid-template-columns: 1fr; }
+  .cat-list { position: static; max-height: none; }
+  .form { grid-template-columns: 1fr; gap: 4px; }
+  .form .ctl { margin-bottom: 8px; }
+}
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.tabs button { border: 0; background: none; padding: 6px 14px; font-size: 13px; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+#search { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.hint { font-size: 12px; color: var(--muted); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; }
+.tree { padding: 6px 0; min-width: 520px; }
+.row { display: grid; grid-template-columns: minmax(150px, 34%) 1fr auto; align-items: center; gap: 10px; padding: 3px 12px 3px calc(12px + var(--depth) * 18px); border-left: 3px solid transparent; }
+.row:hover { background: var(--surface-2); }
+.row.changed { border-left-color: var(--changed); background: color-mix(in srgb, var(--changed-soft) 55%, transparent); }
+.row.hit .k-text, .row.hit .k-input { background: var(--accent-soft); }
+.keycell { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.caret { width: 18px; height: 18px; border: 0; background: none; padding: 0; color: var(--muted); display: inline-grid; place-items: center; flex: none; }
+.caret svg { transition: transform .12s; }
+.caret[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.caret.ph { visibility: hidden; }
+.k-input { border: 1px solid transparent; background: none; padding: 2px 4px; border-radius: 4px; min-width: 0; width: 100%; font-weight: 500; }
+.k-input:hover { border-color: var(--line); }
+.k-input:focus { border-color: var(--accent); background: var(--surface); }
+.k-text { font-family: var(--font-data); font-size: 12px; color: var(--muted); padding: 2px 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.k-text b { font-family: var(--font-ui); font-size: 13px; color: var(--fg); font-weight: 500; margin-left: 6px; }
+.valcell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.v { flex: 1 1 auto; min-width: 0; padding: 4px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-family: var(--font-data); font-size: 12.5px; }
+.v:focus { border-color: var(--accent); }
+.v.num { max-width: 180px; text-align: right; font-variant-numeric: tabular-nums; color: var(--t-num); }
+.v.str { color: var(--t-str); }
+textarea.v { resize: vertical; min-height: 54px; }
+.v.bad { border-color: var(--danger); }
+.vec { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.vec label { display: flex; align-items: center; gap: 4px; font-family: var(--font-data); font-size: 11px; color: var(--muted); }
+.vec input { width: 84px; }
+.swatch { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--line); padding: 0; flex: none; background: none; }
+input[type="color"].swatch { cursor: pointer; }
+input[type="color"].swatch::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"].swatch::-webkit-color-swatch { border: 0; border-radius: 3px; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: var(--font-data); font-size: 12.5px; color: var(--t-bool); }
+.toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+.nullv { font-family: var(--font-data); font-size: 12.5px; color: var(--t-null); font-style: italic; }
+.summary { font-family: var(--font-data); font-size: 12px; color: var(--muted); }
+.rowtools { display: flex; gap: 2px; align-items: center; opacity: .55; }
+.row:hover .rowtools, .row:focus-within .rowtools { opacity: 1; }
+.rowtools select { font-size: 11px; padding: 2px 2px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--muted); }
+.icon { border: 0; background: none; width: 26px; height: 26px; border-radius: 4px; color: var(--muted); display: inline-grid; place-items: center; padding: 0; }
+.icon:hover { background: var(--surface-2); color: var(--fg); }
+.icon.del:hover { background: var(--danger-soft); color: var(--danger); }
+.addrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 4px 12px 6px calc(34px + var(--depth) * 18px); }
+.addrow input, .addrow select { padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 12.5px; }
+.addrow input { width: 160px; }
+.link { border: 0; background: none; color: var(--accent); font-size: 12.5px; font-weight: 500; padding: 3px 4px; }
+.link:hover { text-decoration: underline; }
+.empty { padding: 24px 16px; color: var(--muted); }
+.tablewrap { padding: 4px 12px 10px calc(16px + var(--depth) * 18px); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.tablescroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+table.grid { border-collapse: collapse; font-size: 12.5px; }
+.grid th { position: sticky; top: 0; background: var(--surface-2); text-align: left; font-weight: 600; font-size: 11.5px; letter-spacing: .02em; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.grid td { padding: 3px 4px; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; vertical-align: middle; }
+.grid tr:last-child td { border-bottom: 0; }
+.grid tbody tr:hover td { background: var(--surface-2); }
+.grid td.changed { border-left-color: var(--changed); background: color-mix(in srgb, var(--changed-soft) 55%, transparent); }
+.grid td.hit .v { background: var(--accent-soft); }
+.grid td > .v, .grid td > input.v { width: 100%; min-width: 90px; }
+.grid td > .v.str { min-width: 170px; }
+.grid td > .v.num { min-width: 70px; width: 90px; }
+.grid td:has(> .swatch) { white-space: nowrap; }
+.grid td:has(> .swatch) .v { width: auto; min-width: 150px; }
+.grid td .swatch { vertical-align: middle; margin-right: 4px; }
+.grid .idx { font-family: var(--font-data); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; padding-inline: 8px; }
+.grid .acts { white-space: nowrap; }
+.grid .missing { color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+#raw { width: 100%; min-height: 60vh; border: 0; padding: 14px 16px; background: var(--surface); font-family: var(--font-data); font-size: 12.5px; line-height: 1.55; resize: vertical; tab-size: 2; }
+.rawbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.rawbar .msg { flex: 1 1 240px; font-size: 12.5px; color: var(--muted); min-width: 0; }
+.rawbar .msg.err { color: var(--danger); }
+
+.drop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 82%, transparent); border: 3px dashed var(--accent); font-size: 18px; font-weight: 600; color: var(--accent); }
+.modal { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--fg) 35%, transparent); }
+.modal-card { background: var(--surface); border-radius: 8px; border: 1px solid var(--line); width: min(720px, 100%); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.modal-card h2 { margin: 0; font-size: 15px; }
+.modal-card textarea { min-height: 280px; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); font-family: var(--font-data); font-size: 12.5px; }
+.modal-card .end { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: var(--radius); font-size: 13px; max-width: calc(100% - 32px); }
+
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr auto; }
+  .row .valcell { grid-column: 1 / -1; grid-row: 2; padding-left: 22px; }
+  .tree { min-width: 0; }
+  .v.num { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) { .caret svg { transition: none; } }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">
+      <h1><span class="logo" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Unreal Data Editor</h1>
+      <div class="file"><span id="fname">location 2.json</span><span id="state" class="pill example">Reference copy</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="openBtn" type="button" title="Open a single JSON file">Open file…</button>
+      <button class="btn" id="helpBtn" type="button">Help</button>
+      <button class="btn" id="pasteBtn" type="button">Paste</button>
+      <button class="btn" id="undoBtn" type="button" disabled>Undo</button>
+      <button class="btn" id="copyBtn" type="button">Copy JSON</button>
+      <button class="btn primary" id="saveBtn" type="button">Save JSON</button>
+    </div>
+    <input type="file" id="fileInput" accept=".json,application/json,text/plain" hidden>
+    <input type="file" id="dirInput" webkitdirectory multiple hidden>
+  </div>
+</header>
+
+<main>
+  <section class="project" aria-labelledby="projName">
+    <div class="proj-head">
+      <div class="proj-id">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2h8.4A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div class="proj-text">
+          <div class="eyebrow">Project</div>
+          <div class="proj-name" id="projName">No project chosen</div>
+          <div class="hint" id="projPath">Choose your Unreal project's data folder. Its JSON files appear below.</div>
+        </div>
+      </div>
+      <button class="btn primary" type="button" id="chooseProject">Choose project folder…</button>
+    </div>
+    <div class="recent" id="recentRow" hidden><span class="hint">Recent projects</span><div class="chips" id="recentChips"></div></div>
+    <div class="cloudrow" id="cloudRow"></div>
+    <div class="cards" id="cards"></div>
+    <p class="hint" id="cardsNote"></p>
+    <div class="liveurl" id="liveUrl" hidden><span class="hint">The streamed app reads this file from</span><code id="liveUrlText"></code><button class="link" type="button" id="liveUrlCopy">Copy link</button></div>
+  </section>
+  <div class="banner" id="switchBanner" hidden>
+    <span class="grow" id="switchText"></span>
+    <button class="btn primary" type="button" id="switchSave">Save, then open</button>
+    <button class="btn" type="button" id="switchGo">Open without saving</button>
+    <button class="link" type="button" id="switchStay">Stay here</button>
+  </div>
+  <div class="banner" id="restoreBanner" hidden>
+    <span class="grow" id="restoreText">You have unsaved edits from last time.</span>
+    <button class="btn" type="button" id="restoreBtn">Restore edits</button>
+    <button class="link" type="button" id="restoreDismiss">Discard</button>
+  </div>
+  <div class="banner err" id="errBanner" hidden><span class="grow" id="errText"></span><button class="link" type="button" id="errClose">Dismiss</button></div>
+
+  <div class="tools">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabCats" aria-selected="false">Categories</button>
+      <button type="button" role="tab" id="tabTree" aria-selected="true">All fields</button>
+      <button type="button" role="tab" id="tabRaw" aria-selected="false">Raw JSON</button>
+    </div>
+    <input id="search" type="search" placeholder="Filter by name or value…" autocomplete="off">
+    <button class="link" type="button" id="expandAll">Expand all</button>
+    <button class="link" type="button" id="collapseAll">Collapse all</button>
+  </div>
+
+  <section id="catPanel" hidden></section>
+  <section class="panel" id="treePanel"><div class="tree" id="tree"></div></section>
+  <section class="panel" id="rawPanel" hidden>
+    <textarea id="raw" spellcheck="false" aria-label="Raw JSON"></textarea>
+    <div class="rawbar"><span class="msg" id="rawMsg">Edit the text directly, then apply it to the fields view.</span><button class="btn" type="button" id="rawReset">Revert text</button><button class="btn primary" type="button" id="rawApply">Apply</button></div>
+  </section>
+  <p class="hint">Changed fields are marked on the left edge. Clear a number to leave it empty (null). Rename a field by clicking its name. Ctrl/Cmd+Z undoes the last change when you're not typing in a box. <span id="wbHint" hidden>In Chrome or Edge, a file opened with Open JSON is saved straight back in place.</span></p>
+</main>
+
+<div class="drop" id="drop" hidden>Drop the JSON file to open it</div>
+<div class="modal" id="pasteModal" hidden>
+  <div class="modal-card" role="dialog" aria-labelledby="pasteTitle">
+    <h2 id="pasteTitle">Paste JSON</h2>
+    <textarea id="pasteText" spellcheck="false" placeholder='{ "Weapons": [ … ] }'></textarea>
+    <div class="end"><button class="btn" type="button" id="pasteCancel">Cancel</button><button class="btn primary" type="button" id="pasteOk">Load</button></div>
+  </div>
+</div>
+<div class="modal" id="copyModal" hidden>
+  <div class="modal-card" role="dialog" aria-labelledby="copyTitle">
+    <h2 id="copyTitle">Copy the updated JSON</h2>
+    <p class="hint" style="margin:0">Saving a file isn't available here. Select all of the text below, copy it, and paste it over the contents of your JSON file.</p>
+    <textarea id="copyText" spellcheck="false" readonly></textarea>
+    <div class="end"><button class="btn primary" type="button" id="copyClose">Done</button></div>
+  </div>
+</div>
+<div class="modal" id="cloudModal" hidden>
+  <form class="modal-card" id="cloudForm" role="dialog" aria-labelledby="cloudTitle">
+    <h2 id="cloudTitle">Cloud saving (free, with GitHub)</h2>
+    <p class="hint" style="margin:0">Saving to the cloud lets the streamed Unreal app load the latest data. See Help for the one-time setup.</p>
+    <label class="fld"><span>Repository</span><input id="cRepo" placeholder="your-name/unreal-data" autocomplete="off" required></label>
+    <div class="fld2">
+      <label class="fld"><span>Branch</span><input id="cBranch" value="main" autocomplete="off" required></label>
+      <label class="fld"><span>Projects folder</span><input id="cDir" value="data" autocomplete="off"></label>
+    </div>
+    <label class="fld"><span>Access key (GitHub token)</span><input id="cToken" type="password" placeholder="github_pat_…" autocomplete="off" required></label>
+    <p class="hint" id="cloudMsg" style="margin:0">The key stays in this browser only.</p>
+    <div class="end"><button class="link" type="button" id="cloudOff">Disconnect</button><button class="btn" type="button" id="cloudCancel">Cancel</button><button class="btn primary" type="submit">Connect</button></div>
+  </form>
+</div>
+<div class="modal" id="helpModal" hidden>
+  <div class="modal-card help" role="dialog" aria-labelledby="helpTitle">
+    <div class="help-head"><h2 id="helpTitle">Help</h2><button class="btn" type="button" id="helpClose">Close</button></div>
+    <div class="help-body">
+      <h3>Editing, for artists</h3>
+      <ol>
+        <li><b>Pick the project.</b> Click a cloud project, or <i>Choose project folder…</i> for files on your computer. Then click the file you want (Amenities, Location…).</li>
+        <li><b>Pick a category</b> in the list on the left of the Categories tab. Its details and items appear on the right.</li>
+        <li><b>Add a category:</b> click <i>+ New category</i> under the list. It starts as a copy of the last category with the names cleared and new ID numbers. Type the name, then fill in its items.</li>
+        <li><b>Add a place or amenity:</b> click <i>+ Add row</i> under the items table. The new row copies the last one and gets a new ID, so change the name and numbers.</li>
+        <li><b>Remove something:</b> click the bin icon. <i>Undo</i> brings it back.</li>
+        <li><b>Colors:</b> click the colored square. <b>Icons:</b> pick from the suggestions so the name matches an icon in the app.</li>
+        <li><b>Save</b> when you're done. Changed fields are marked in amber until you save.</li>
+      </ol>
+      <h3>Map coordinates</h3>
+      <p>In Google Maps, right-click the place and click the two numbers at the top of the menu to copy them. The first is <b>lat</b>, the second is <b>lon</b>.</p>
+      <h3>One-time setup, for the developer</h3>
+      <p>The streamed build runs on Stream Pixel's servers, so it can't read files on an artist's computer. Instead, the data lives in a free public GitHub repository: this editor saves there, and the Unreal app downloads it when it starts.</p>
+      <ol>
+        <li>Create a free <b>public</b> GitHub repository, for example <code>unreal-data</code>. Make a folder per Unreal project inside <code>data/</code>, for example <code>data/Sirrus/</code>, and upload that project's JSON files into it (on GitHub: <i>Add file → Upload files</i>).</li>
+        <li>Make an access key: GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token. Choose <i>Only select repositories</i> and pick the data repository, then set <i>Contents</i> to <i>Read and write</i>. Give the key to the artists.</li>
+        <li>In this editor, click <i>Connect cloud</i> and enter the repository name and the key. The projects appear as buttons.</li>
+        <li>In Unreal, load each JSON from its link instead of the local file. The editor shows the link under the file cards when a cloud file is open. It looks like <code>https://raw.githubusercontent.com/OWNER/unreal-data/main/data/PROJECT/amenities.json</code>.
+          <ul>
+            <li>Blueprints: install the free <b>VaRest</b> plugin. On BeginPlay, request the link, then pass <i>Get Response Content as String</i> to the same JSON parsing you use today. Keep the packaged file as a fallback if the request fails.</li>
+            <li>To pick up changes while someone is streaming, repeat the request with <i>Set Timer by Event</i> (every 60 seconds) and refresh the markers.</li>
+          </ul>
+        </li>
+        <li>Package once and upload to Stream Pixel as usual. After that, data changes need no new build. GitHub can take up to about 5 minutes to serve a new save.</li>
+        <li>Optional: host this editor for free with GitHub Pages. Upload this HTML file to the repository as <code>index.html</code> and turn on Settings → Pages. Artists then open <code>https://OWNER.github.io/unreal-data/</code>.</li>
+      </ol>
+      <p class="hint">Field descriptions in this editor are best guesses from the field names. The developer can change them in the FIELD_HELP list near the top of the page's script.</p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<div id="datalists" hidden></div>
+
+<script type="application/json" id="samples">{"location 2.json": "[\n  {\n    \"category\": \"Education\",\n    \"category_id\": 100,\n    \"color\": \"(R=1,G=1,B=1,A=1)\",\n    \"icon\": \"🏫\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"EuroKids Preschool\",\n        \"lat\": 28.405,\n        \"lon\": 76.953,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 6000,\n        \"poleWidth\": 10,\n        \"distance\": 1.22\n      },\n      {\n        \"id\": 2,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Delhi Public School\",\n        \"lat\": 28.406,\n        \"lon\": 76.961,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 20000,\n        \"poleWidth\": 10,\n        \"distance\": 1.79\n      },\n      {\n        \"id\": 3,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"RPS International School\",\n        \"lat\": 28.413,\n        \"lon\": 76.942,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 14000,\n        \"poleWidth\": 10,\n        \"distance\": 1.89\n      },\n      {\n        \"id\": 4,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"St. Xaviers High School\",\n        \"lat\": 28.416,\n        \"lon\": 76.945,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 19000,\n        \"poleWidth\": 10,\n        \"distance\": 2.22\n      }\n    ]\n  },\n  {\n    \"category\": \"Healthcare\",\n    \"category_id\": 101,\n    \"color\": \"(R=1,G=1,B=1,A=1)\",\n    \"icon\": \"🏥\",\n    \"items\": [\n      {\n        \"id\": 5,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Miracles Apollo Cradle / Spectra\",\n        \"lat\": 28.392,\n        \"lon\": 76.953,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 6000,\n        \"poleWidth\": 10,\n        \"distance\": 0.79\n      },\n      {\n        \"id\": 6,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Silver Streaks Hospital\",\n        \"lat\": 28.399,\n        \"lon\": 76.930,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 8000,\n        \"poleWidth\": 10,\n        \"distance\": 1.64\n      },\n      {\n        \"id\": 7,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Aarvy Healthcare Super Specialty Hospital\",\n        \"lat\": 28.413,\n        \"lon\": 76.941,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": 1.89\n      },\n      {\n        \"id\": 8,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"MET Hospital\",\n        \"lat\": 28.380,\n        \"lon\": 76.963,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 12000,\n        \"poleWidth\": 10,\n        \"distance\": 2.41\n      },\n      {\n        \"id\": 9,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Fortis Manesar\",\n        \"lat\": 28.367,\n        \"lon\": 76.932,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": 3.56\n      }\n    ]\n  },\n  {\n    \"category\": \"Shopping\",\n    \"category_id\": 102,\n    \"color\": \"(R=1,G=1,B=1,A=1)\",\n    \"icon\": \"🛍️\",\n    \"items\": [\n      {\n        \"id\": 10,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"SS Omnia\",\n        \"lat\": 28.401,\n        \"lon\": 76.946,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 5000,\n        \"poleWidth\": 10,\n        \"distance\": 0.53\n      },\n      {\n        \"id\": 11,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Iris Broadway\",\n        \"lat\": 28.40,\n        \"lon\": 76.948,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 10000,\n        \"poleWidth\": 10,\n        \"distance\": 0.71\n      },\n      {\n        \"id\": 12,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Sapphire 83\",\n        \"lat\": 28.406,\n        \"lon\": 76.938,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 20000,\n        \"poleWidth\": 10,\n        \"distance\": 1.2\n      },\n      {\n        \"id\": 13,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Sapphire 90\",\n        \"lat\": 28.404,\n        \"lon\": 76.936,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 25000,\n        \"poleWidth\": 10,\n        \"distance\": 1.3\n      },\n      {\n        \"id\": 14,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Felix Plaza\",\n        \"lat\": 28.383,\n        \"lon\": 76.967,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": 2.5\n      },\n      {\n        \"id\": 15,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Elan Miracle\",\n        \"lat\": 28.416,\n        \"lon\": 76.964,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 21000,\n        \"poleWidth\": 10,\n        \"distance\": 2.7\n      }\n    ]\n  },\n\n  {\n    \"category\": \"Transport\",\n    \"category_id\": 103,\n    \"color\": \"(R=1,G=1,B=1,A=1)\",\n    \"icon\": \"🛣️\",\n    \"items\": [\n      {\n        \"id\": 19,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Dwaraka Expressway\",\n        \"lat\": 28.418,\n        \"lon\": 76.964,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 7000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 20,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Cloverleaf Interchange\",\n        \"lat\": 28.407,\n        \"lon\": 76.990,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 21,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Central Peripheral Road\",\n        \"lat\": 28.412,\n        \"lon\": 76.979,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 9000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 22,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"IGI Airport\",\n        \"lat\": 28.556,\n        \"lon\": 77.09,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 8000,\n        \"poleWidth\": 10,\n        \"distance\": 23\n      },\n {\n        \"id\": 23,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Delhi Jaipur Expressway\",\n        \"lat\": 28.379,\n        \"lon\": 76.961,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 7000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 24,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Dwaraka Expy Link Road\",\n        \"lat\": 28.400,\n        \"lon\": 76.962,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 25,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Pataudi Road\",\n        \"lat\": 28.427,\n        \"lon\": 76.945,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 9000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      },\n      {\n        \"id\": 26,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Airport Road\",\n        \"lat\": 28.443,\n        \"lon\": 77.960,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 8000,\n        \"poleWidth\": 10,\n        \"distance\": null\n      }\n\n\n\n\n\n    ]\n  },\n  {\n    \"category\": \"Commercial Hubs\",\n    \"category_id\": 105,\n    \"color\": \"(R=1,G=1,B=1,A=1)\",\n    \"icon\": \"🏢\",\n    \"items\": [\n      {\n        \"id\": 27,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"IMT Manesar\",\n        \"lat\": 28.37,\n        \"lon\": 76.905,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 15000,\n        \"poleWidth\": 10,\n        \"distance\": 4.92\n      },\n      {\n        \"id\": 28,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Corporate Greens\",\n        \"lat\": 28.401,\n        \"lon\": 76.99,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 8000,\n        \"poleWidth\": 10,\n        \"distance\": 5.07\n      },\n      {\n        \"id\": 29,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"American Express\",\n        \"lat\": 28.403,\n        \"lon\": 77.00,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 12000,\n        \"poleWidth\": 10,\n        \"distance\": 5.52\n      },\n      {\n        \"id\": 30,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Udyog Vihar Phase 4\",\n        \"lat\": 28.50,\n        \"lon\": 77.069,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 6000,\n        \"poleWidth\": 10,\n        \"distance\": 16.8\n      },\n      {\n        \"id\": 31,\n        \"color\": \"(R=1,G=1,B=1,A=1)\",\n        \"name\": \"Cyber City\",\n        \"lat\": 28.496,\n        \"lon\": 77.0930,\n        \"unit\": \"~ km\",\n        \"markerHeight\": 11000,\n        \"poleWidth\": 10,\n        \"distance\": 17.5\n      }\n    ]\n  }\n]", "amenities.json": "{\n  \"amenities\": [\n    {\n      \"category_id\": 20020,\n      \"category\": \"Overview\",\n      \"items\": [\n        {\n          \"amenity_id\": 1002,\n          \"title\": \"Entrance\",\n          \"icon\": \"Entrance\"\n        },\n        {\n          \"amenity_id\": 1003,\n          \"title\": \"Entry Plaza\",\n          \"icon\": \"Entrance Plaza\"\n        },\n        {\n          \"amenity_id\": 1004,\n          \"title\": \"Event Lawn\",\n          \"icon\": \"Party\"\n        },\n        {\n          \"amenity_id\": 1006,\n          \"title\": \"Cycling Track\",\n          \"icon\": \"Cycling\"\n        },\n        {\n          \"amenity_id\": 10011,\n          \"title\": \"Forest\",\n          \"icon\": \"Forest\"\n        },\n  {\n          \"amenity_id\": 10010,\n          \"title\": \"Meditation Zone\",\n          \"icon\": \"Meditation\"\n        },\n  {\n          \"amenity_id\": 2002,\n          \"title\": \"Meadows\",\n          \"icon\": \"Meadows\"\n        },\n            {\n          \"amenity_id\": 1008,\n          \"title\": \"Kids Play\",\n          \"icon\": \"Kid’s Play\"\n        },\n {\n          \"amenity_id\": 2003,\n          \"title\": \"Elder Seating\",\n          \"icon\": \"Elder Seating\"\n        },\n   {\n          \"amenity_id\": 2005,\n          \"title\": \"Lakeside Deck\",\n          \"icon\": \"Lake Side\"\n        },\n  {\n          \"amenity_id\": 2004,\n          \"title\": \"Water Body\",\n          \"icon\": \"Water Body\"\n        },\n     \n        {\n          \"amenity_id\": 2006,\n          \"title\": \"Islands\",\n          \"icon\": \"Island\"\n        },\n  {\n          \"amenity_id\": 2008,\n          \"title\": \"Party Lawn\",\n          \"icon\": \"Party Lawn\"\n        },\n \n    {\n          \"amenity_id\": 2007,\n          \"title\": \"Kids Play\",\n          \"icon\": \"Kid’s Play\"\n        },\n\n\n        {\n          \"amenity_id\": 1007,\n          \"title\": \"Pet Park\",\n          \"icon\": \"Pet Park\"\n        }\n    \n      ]\n    },\n    \n    {\n      \"category_id\": 3002,\n      \"category\": \"Clubhouse\",\n      \"items\": [\n        {\n          \"amenity_id\": 3001,\n          \"title\": \"Pool\",\n          \"icon\": \"Floating Body\"\n        }\n      ]\n    } ,\n    {\n      \"category_id\": 4001,\n      \"category\": \"Sports Area\",\n      \"items\": [\n        {\n          \"amenity_id\": 4002,\n          \"title\": \"Tennis court\",\n          \"icon\": \"Floating Body\"\n        },\n\n        {\n          \"amenity_id\": 4003,\n          \"title\": \"Cricket net\",\n          \"icon\": \"Floating Body\"\n        },\n        {\n          \"amenity_id\": 4004,\n          \"title\": \"Pickleball\",\n          \"icon\": \"Floating Body\"\n        },\n         {\n          \"amenity_id\": 4005,\n          \"title\": \"Basketball court\",\n          \"icon\": \"Floating Body\"\n        }\n      ]\n    }\n  ]\n}", "amenities2.json": "{\n    \"amenities\": [\n        {\n            \"category_id\": 40011,\n            \"category\": \"Tower D\",\n            \"sub_category\": [\n                {\n                    \"sub_category_id\": 1,\n                    \"amenity_id\": 400140,\n                    \"title\": \"Lobby\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Lobby 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40012\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Lobby 2\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40013\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Lobby 3\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40014\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Stilt View\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400139\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 2,\n                    \"amenity_id\": 40015,\n                    \"title\": \"City facing\",\n                    \"items\": [\n                        \n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400144\n                        },   {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 40015\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 40016\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 40017\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 34\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 40018\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 3,\n                    \"amenity_id\": 40019,\n                    \"title\": \"Green Facing\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400145\n                        },\n                          {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 40019\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400110\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400111\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 32\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400112\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 4,\n                    \"amenity_id\": 400113,\n                    \"title\": \"D - 2701\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400114\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400160\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400149\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400116\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400161\n                        },\n                        \n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400147\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400117\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400162\n                        },\n                     \n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400148\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400115\n                        },\n                         \n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400146\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400163\n                        }\n                       \n                    ]\n                },\n                {\n                    \"sub_category_id\": 5,\n                    \"amenity_id\": 400118,\n                    \"title\": \"D - 2702\",\n                                                                    \"icon\": \"Unit\",\n\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400119\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400120\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Dining\",\n                            \"icon\": \"Dining\",\n                            \"amenity_id\": 400121\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400122\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400125\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400142\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400126\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400127\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400143\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400128\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400123\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400141\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400124\n                        }\n                        \n                        \n                    ]\n                },\n                {\n                    \"sub_category_id\": 6,\n                    \"amenity_id\": 400129,\n                    \"title\": \"D - 2703\",\n\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living \",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400130\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400168\n                        },\n                      {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400153\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedrooom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400132\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400169\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400151\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400133\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400152\n                        }, \n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400170\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400131\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400150\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400171\n                        }\n                        \n                    ]\n                },\n                {\n                    \"sub_category_id\": 7,\n                    \"amenity_id\": 400134,\n\n                    \"title\": \"D - 2704\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living \",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400135\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400167\n                        },\n                       {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400156\n                        },\n                        \n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedrooom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400137\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400154\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400166\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400138\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400165\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400155\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400136\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400157\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400164\n                        }\n                        \n                    ]\n                }\n            ]\n        },\n        {\n            \"category_id\": 40021,\n            \"category\": \"Tower E\",\n            \"sub_category\": [\n                {\n                    \"sub_category_id\": 1,\n                    \"amenity_id\": 40022,\n                    \"title\": \"Lobby\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Stilt View\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40023\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 2,\n                    \"amenity_id\": 40024,\n                    \"title\": \"Green Facing\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400230\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40024\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40025\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40026\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 39\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40027\n                        }\n                    ]\n                },\n                 {\n                    \"sub_category_id\": 3,\n                    \"amenity_id\": 40028,\n                    \"title\": \"City facing\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400231\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40028\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40029\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400210\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 36\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400211\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"category_id\": 40031,\n            \"category\": \"Tower F\",\n            \"sub_category\": [\n                {\n                    \"sub_category_id\": 1,\n                    \"amenity_id\": 40032,\n                    \"title\": \"Lobby\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Stilt View\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40033\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 2,\n                    \"amenity_id\": 40034,\n                    \"title\": \"Green Facing\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400340\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40034\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40035\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40036\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 39\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40037\n                        }\n                    ]\n                },\n                 {\n                    \"sub_category_id\": 3,\n                    \"amenity_id\": 40038,\n                    \"title\": \"City Facing\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400341\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40038\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40039\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400310\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 36\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400311\n                        }\n                    ]\n                },\n                 {\n                    \"sub_category_id\": 4,\n                    \"amenity_id\": 400312,\n                    \"title\": \"F - 2701\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400313\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400376\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400344\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400316\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400377\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400342\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400315\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400378\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400314\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400343\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400379\n                        }\n                        \n                      \n                       \n                        \n                    ]\n                }, {\n                    \"sub_category_id\": 5,\n                    \"amenity_id\": 400317,\n                    \"title\": \"F - 2702\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400318\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400380\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400346\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400321\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400381\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400345\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400320\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400382\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400319\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400383\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400347\n                        }\n                        \n\n                       \n                    ]\n                }, {\n                    \"sub_category_id\": 6,\n                    \"amenity_id\": 400322,\n                    \"title\": \"F - 2703\",\n                                                                    \"icon\": \"Unit\",\n\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400323\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400384\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Dining\",\n                            \"icon\": \"Dining\",\n                            \"amenity_id\": 400325\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400326\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400329\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400385\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400339\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400331\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400386\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400327\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathrrom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400338\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400387\n                        }\n                        \n                         \n                        \n    \n                    ]\n                }, {\n                    \"sub_category_id\": 7,\n                    \"amenity_id\": 400333,\n                    \"title\": \"F - 2704\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Living\",\n                            \"icon\": \"Living Room\",\n                            \"amenity_id\": 400334\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400372\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Kitchen\",\n                            \"icon\": \"Kitchen\",\n                            \"amenity_id\": 400349\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 3\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400337\n                        },\n                         {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400373\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400348\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 2\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400336\n                        },\n                       \n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400374\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bedroom 1\",\n                            \"icon\": \"Bedroom\",\n                            \"amenity_id\": 400335\n                        },\n                    {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Bathroom\",\n                            \"icon\": \"Bathroom\",\n                            \"amenity_id\": 400350\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Balcony\",\n                            \"icon\": \"Balcony\",\n                            \"amenity_id\": 400375\n                        }\n                        \n                       \n                    ]\n                }\n            ]\n        },\n        {\n            \"category_id\": 40041,\n            \"category\": \"Tower G\",\n            \"sub_category\": [\n                {\n                    \"sub_category_id\": 1,\n                    \"amenity_id\": 40042,\n                    \"title\": \"Lobby\",\n                    \"items\": [\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Stilt View\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40043\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 2,\n                    \"amenity_id\": 40044,\n                    \"title\": \"Green Facing\",\n                    \"items\": [\n                          {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400412\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40044\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40045\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40046\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 39\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40047\n                        }\n                    ]\n                },\n                {\n                    \"sub_category_id\": 3,\n                    \"amenity_id\": 40048,\n                    \"title\": \"City Facing\",\n                    \"items\": [\n                          {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 1\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400413\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 10\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40048\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 20\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 40049\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 30\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400410\n                        },\n                        {\n                            \"sub_items\": [\n                                \"\"\n                            ],\n                            \"title\": \"Floor 36\",\n                            \"icon\": \"Lobby\",\n                            \"amenity_id\": 400411\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}"}</script>
+<script>
+(() => {
+const SAMPLES = JSON.parse(document.getElementById("samples").textContent);
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+const DRAFT_KEY = "ued.draft.v1";
+
+let data, original, fileName, isExample = true, indent = 2, trailingNL = true;
+let committed = "", undoStack = [];
+let collapsed = new Set();
+let changed = new Set();
+let query = "";
+let viewMode = new Map(); // array path -> "table" | "fields"
+
+/* ---------- helpers ---------- */
+const typeOf = v => v === null ? "null" : Array.isArray(v) ? "array" : typeof v === "object" ? "object" : typeof v;
+const clone = v => JSON.parse(JSON.stringify(v));
+const pkey = path => JSON.stringify(path);
+function getAt(path) { let v = data; for (const k of path) v = v[k]; return v; }
+function setAt(path, val) {
+  if (!path.length) { data = val; return; }
+  const parent = getAt(path.slice(0, -1)); parent[path[path.length - 1]] = val;
+}
+function flatten(v, path = [], out = new Map()) {
+  const t = typeOf(v);
+  if (t === "object" || t === "array") {
+    const keys = Object.keys(v);
+    out.set(pkey(path), t + ":" + keys.join("\u0001"));
+    for (const k of keys) flatten(v[k], [...path, t === "array" ? +k : k], out);
+  } else out.set(pkey(path), t + ":" + JSON.stringify(v));
+  return out;
+}
+let origFlat = new Map();
+function computeChanged() {
+  if (isExample && !undoStack.length) { changed = new Set(); return; }
+  const now = flatten(data); changed = new Set();
+  for (const [k, sig] of now) if (origFlat.get(k) !== sig) changed.add(k);
+}
+function serialize() { return JSON.stringify(data, null, indent) + (trailingNL ? "\n" : ""); }
+function detectIndent(text) {
+  const m = text.match(/\n([ \t]+)\S/);
+  if (!m) return 2;
+  return m[1][0] === "\t" ? "\t" : Math.min(m[1].length, 8);
+}
+function isVector(v) {
+  if (typeOf(v) !== "object") return false;
+  const ks = Object.keys(v);
+  return ks.length >= 2 && ks.length <= 4 && ks.every(k => typeof v[k] === "number" && k.length <= 6);
+}
+function isColorObj(v) {
+  if (!isVector(v)) return false;
+  const ks = Object.keys(v).map(k => k.toUpperCase());
+  return ["R", "G", "B"].every(c => ks.includes(c));
+}
+/* Plain descriptions shown next to fields. Edit these to match how the app uses each field. */
+const FIELD_HELP = {
+  category: "Name of the category shown in the app.",
+  category_id: "Unique number for this category. Don't reuse a number another category has.",
+  color: "Tint used for this category or marker. Click the square to pick a color.",
+  icon: "Icon shown in the app. Pick from the suggestions so it matches an icon the app knows.",
+  items: "The entries in this category. Add a row for each new place or amenity.",
+  sub_category: "Groups inside this category, such as a tower's lobby or floors. Each group has its own items.",
+  sub_category_id: "Number of this group within its category.",
+  amenity_id: "Unique number the app uses to find this amenity. Don't reuse a number.",
+  id: "Unique number for this entry. Don't reuse a number.",
+  title: "Name shown in the app.",
+  name: "Name shown in the app.",
+  sub_items: "Extra entries under this item, separated by commas. Leave empty if there are none.",
+  lat: "Latitude, the first number you copy from Google Maps.",
+  lon: "Longitude, the second number you copy from Google Maps.",
+  unit: "Text shown next to the distance, for example ~ km.",
+  markerHeight: "Height of the map marker pole in the 3D scene.",
+  poleWidth: "Thickness of the map marker pole.",
+  distance: "Distance shown to the viewer, in the unit above."
+};
+const helpFor = k => FIELD_HELP[k] || FIELD_HELP[String(k).toLowerCase()] || "";
+let view = "tree", activeCat = 0;
+const NUM_RE = /^\s*-?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?\s*$/i;
+const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8}|[0-9a-f]{3})$/i;
+function itemLabel(v) {
+  if (typeOf(v) !== "object") return "";
+  for (const k of ["DisplayName", "Name", "name", "Title", "title", "category", "Category", "Id", "ID", "id", "Key", "key", "RowName"]) {
+    if (typeof v[k] === "string" || typeof v[k] === "number") return String(v[k]);
+  }
+  return "";
+}
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600);
+}
+function parseError(text, err) {
+  let msg = err.message.replace(/^JSON\.parse: /, "");
+  const pos = msg.match(/position (\d+)/);
+  if (pos && !/line \d+/.test(msg)) {
+    const before = text.slice(0, +pos[1]);
+    const line = before.split("\n").length, col = before.length - before.lastIndexOf("\n");
+    msg += ` (line ${line}, column ${col})`;
+  }
+  return msg;
+}
+function showError(msg) { $("errText").textContent = msg; $("errBanner").hidden = false; }
+
+/* ---------- state changes ---------- */
+function commit(rerender = true) {
+  const now = JSON.stringify(data);
+  if (now === committed) return;
+  undoStack.push(committed); if (undoStack.length > 200) undoStack.shift();
+  committed = now;
+  computeChanged();
+  if (rerender) render(); else refreshMarks();
+  updateHeader();
+  store.set(DRAFT_KEY, JSON.stringify({ fileName, original, data: committed, indent, trailingNL, isExample, at: Date.now() }));
+}
+function undo() {
+  if (!undoStack.length) return;
+  committed = undoStack.pop(); data = JSON.parse(committed);
+  computeChanged(); render(); updateHeader(); toast("Undid the last change");
+}
+function load(text, name, opts = {}) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) { showError(`${name || "That text"} isn't valid JSON: ${parseError(text, e)}. Fix it in a text editor or paste it into Raw JSON to see where.`); return false; }
+  data = parsed; original = text; fileName = name || "data.json"; fileHandle = null;
+  indent = detectIndent(text); trailingNL = /\n$/.test(text);
+  isExample = !!opts.example; undoStack = []; committed = JSON.stringify(data);
+  origFlat = flatten(JSON.parse(text)); changed = new Set(); collapsed = new Set();
+  autoCollapse(data, []);
+  $("errBanner").hidden = true; $("restoreBanner").hidden = true;
+  $("fname").textContent = fileName;
+  if (!opts.keepDraft) store.del(DRAFT_KEY);
+  activeCat = 0;
+  const wantCats = !!catSource();
+  $("tabCats").hidden = !wantCats;
+  if (view !== "raw") view = wantCats ? "cats" : "tree";
+  setTab(view); updateHeader(); syncRaw();
+  return true;
+}
+function autoCollapse(v, path, depth = 0) {
+  const t = typeOf(v); if (t !== "object" && t !== "array") return;
+  if (path.length && depth >= 3) collapsed.add(pkey(path));
+  for (const k of Object.keys(v)) autoCollapse(v[k], [...path, t === "array" ? +k : k], depth + 1);
+}
+function updateHeader() {
+  const s = $("state");
+  const n = changed.size;
+  if (isExample && !n) { s.className = "pill example"; s.textContent = "Reference copy"; }
+  else if (n) { s.className = "pill dirty"; s.textContent = `${n} change${n === 1 ? "" : "s"} not saved`; }
+  else { s.className = "pill"; s.textContent = "No changes"; }
+  $("undoBtn").disabled = !undoStack.length;
+  if (typeof markActiveCard === "function") try { markActiveCard(); } catch {}
+}
+
+/* ---------- tree rendering ---------- */
+const SVG_CARET = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_DEL = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 4h8M5.5 4V2.8h3V4M4.2 4l.6 7.2h4.4l.6-7.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+const SVG_DUP = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 2.5h-6a1 1 0 0 0-1 1v6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== undefined && v !== null) e.setAttribute(k, v);
+  }
+  for (const c of kids) if (c != null) e.append(c);
+  return e;
+}
+
+function matches(v, key, q) {
+  if (!q) return true;
+  if (String(key).toLowerCase().includes(q)) return true;
+  const t = typeOf(v);
+  if (t === "object" || t === "array") return Object.keys(v).some(k => matches(v[k], k, q));
+  return String(v).toLowerCase().includes(q);
+}
+function selfHit(v, key, q) {
+  if (!q) return false;
+  if (String(key).toLowerCase().includes(q)) return true;
+  const t = typeOf(v);
+  return t !== "object" && t !== "array" && String(v).toLowerCase().includes(q);
+}
+
+function render() {
+  buildSuggestions();
+  if (view === "cats") { if (catSource()) { renderCats(); return; } setTab("tree"); return; }
+  const tree = $("tree"); const scroll = window.scrollY;
+  tree.textContent = "";
+  const t = typeOf(data);
+  if (t === "array" && isTableMode(data, pkey([]))) tree.append(renderTable(data, [], 0));
+  else if (t === "object" || t === "array") {
+    renderChildren(tree, data, [], 0);
+    if (!query) tree.append(addRow(data, [], 0));
+    if (query && !tree.querySelector(".row")) tree.append(el("div", { class: "empty" }, `Nothing matches “${query}”.`));
+  } else {
+    tree.append(renderNode(data, [], "(root)", null, 0));
+  }
+  window.scrollTo(0, scroll);
+}
+function renderChildren(container, v, path, depth) {
+  const isArr = Array.isArray(v);
+  Object.keys(v).forEach(k => {
+    const key = isArr ? +k : k;
+    if (!matches(v[k], key, query)) return;
+    container.append(renderNode(v[k], [...path, key], key, isArr ? "array" : "object", depth));
+  });
+}
+
+function renderNode(v, path, key, parentType, depth) {
+  const t = typeOf(v), id = pkey(path);
+  const frag = document.createDocumentFragment();
+  const row = el("div", { class: "row", "data-path": id, style: `--depth:${depth}` });
+  if (changed.has(id)) row.classList.add("changed");
+  if (selfHit(v, key, query)) row.classList.add("hit");
+  const container = t === "object" || t === "array";
+  const vec = isVector(v);
+  const open = container && !vec && (query ? true : !collapsed.has(id));
+
+  // key cell
+  const caret = el("button", { class: "caret" + (container && !vec ? "" : " ph"), type: "button", html: SVG_CARET,
+    "aria-expanded": String(open), "aria-label": open ? "Collapse" : "Expand", tabindex: container && !vec ? null : "-1" });
+  if (container && !vec) caret.addEventListener("click", () => { collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id); render(); });
+  const keycell = el("div", { class: "keycell" }, caret);
+  if (parentType === "object") {
+    const ki = el("input", { class: "k-input", value: key, "aria-label": "Field name", spellcheck: "false" });
+    ki.addEventListener("change", () => renameKey(path, ki.value.trim(), ki));
+    ki.addEventListener("keydown", e => { if (e.key === "Enter") ki.blur(); });
+    keycell.append(ki);
+  } else {
+    const lab = parentType === "array" ? itemLabel(v) : "";
+    const kt = el("span", { class: "k-text" }, parentType === "array" ? `[${key}]` : String(key));
+    if (lab) kt.append(el("b", {}, lab));
+    keycell.append(kt);
+  }
+  row.append(keycell);
+
+  // value cell
+  const valcell = el("div", { class: "valcell" });
+  if (vec) valcell.append(vectorEditor(v, path));
+  else if (container) {
+    const n = Object.keys(v).length;
+    valcell.append(el("span", { class: "summary" }, t === "array" ? `${n} item${n === 1 ? "" : "s"}` : `${n} field${n === 1 ? "" : "s"}`));
+  } else valcell.append(...primitiveEditor(v, path));
+  row.append(valcell);
+
+  // tools
+  const tools = el("div", { class: "rowtools" });
+  if (t === "array" && v.length && v.every(x => typeOf(x) === "object")) {
+    const asTable = isTableMode(v, id);
+    tools.append(el("button", { class: "link", type: "button", title: asTable ? "Show each item as fields" : "Show items as a table",
+      onclick: () => { viewMode.set(id, asTable ? "fields" : "table"); collapsed.delete(id); render(); } }, asTable ? "Fields" : "Table"));
+  }
+  if (path.length) {
+    const sel = el("select", { "aria-label": "Value type", title: "Change type" });
+    for (const [val, lab] of [["string", "Text"], ["number", "Number"], ["boolean", "On/Off"], ["null", "Empty"], ["object", "Group"], ["array", "List"]])
+      sel.append(el("option", { value: val, ...(val === t ? { selected: "" } : {}) }, lab));
+    sel.addEventListener("change", () => { setAt(path, convert(getAt(path), sel.value)); commit(); });
+    tools.append(sel);
+    if (parentType === "array") tools.append(el("button", { class: "icon", type: "button", title: "Duplicate", "aria-label": "Duplicate item", html: SVG_DUP,
+      onclick: () => { const arr = getAt(path.slice(0, -1)); arr.splice(key + 1, 0, clone(arr[key])); commit(); toast("Item duplicated"); } }));
+    tools.append(el("button", { class: "icon del", type: "button", title: "Delete", "aria-label": "Delete", html: SVG_DEL,
+      onclick: () => {
+        const parent = getAt(path.slice(0, -1));
+        Array.isArray(parent) ? parent.splice(key, 1) : delete parent[key];
+        commit(); toast(`Deleted ${parentType === "array" ? "item " + key : "“" + key + "”"}. Undo to bring it back.`);
+      } }));
+  }
+  row.append(tools);
+  frag.append(row);
+
+  if (open && t === "array" && isTableMode(v, id)) frag.append(renderTable(v, path, depth + 1));
+  else if (open) {
+    renderChildren(frag, v, path, depth + 1);
+    if (!query) frag.append(addRow(v, path, depth + 1));
+  }
+  return frag;
+}
+
+function isTableMode(v, id) {
+  if (!Array.isArray(v) || !v.length || !v.every(x => typeOf(x) === "object")) return false;
+  if (viewMode.has(id)) return viewMode.get(id) === "table";
+  // Default to a table when every item is a flat record (text, numbers, on/off, colors, short lists of text).
+  return v.length >= 1 && v.every(x => Object.values(x).every(y => {
+    const ty = typeOf(y);
+    return (ty !== "object" && ty !== "array") || isVector(y) || (ty === "array" && y.every(z => typeOf(z) !== "object" && typeOf(z) !== "array"));
+  }));
+}
+function renderTable(v, path, depth) {
+  const id = pkey(path);
+  const wrap = el("div", { class: "tablewrap", style: `--depth:${depth}` });
+  const cols = [];
+  v.forEach(it => Object.keys(it).forEach(k => { if (!cols.includes(k)) cols.push(k); }));
+  const table = el("table", { class: "grid" });
+  const hr = el("tr", {}, el("th", { class: "idx" }, "#"));
+  cols.forEach(c => hr.append(el("th", { title: helpFor(c) || null }, c)));
+  hr.append(el("th", {}, el("span", { class: "sr" }, "Actions")));
+  table.append(el("thead", {}, hr));
+  const body = el("tbody");
+  let shown = 0;
+  v.forEach((it, i) => {
+    if (query && !matches(it, i, query)) return;
+    shown++;
+    const ip = [...path, i];
+    const tr = el("tr", { "data-path": pkey(ip) });
+    tr.append(el("td", { class: "idx" }, String(i)));
+    cols.forEach(c => {
+      const cp = [...ip, c], td = el("td", { "data-path": pkey(cp) });
+      if (changed.has(pkey(cp))) td.classList.add("changed");
+      if (!(c in it)) {
+        td.append(el("button", { class: "link missing", type: "button", title: `Add “${c}” to this item`,
+          onclick: () => { const other = v.find(x => c in x); it[c] = other ? blankValue(other[c]) : ""; commit(); } }, "+ add"));
+      } else {
+        const x = it[c], tx = typeOf(x);
+        if (tx !== "object" && tx !== "array") td.append(...primitiveEditor(x, cp));
+        else if (isVector(x)) td.append(vectorEditor(x, cp));
+        else if (tx === "array" && x.every(z => typeof z === "string")) td.append(listEditor(x, cp));
+        else td.append(el("button", { class: "link", type: "button", onclick: () => { viewMode.set(id, "fields"); collapsed.delete(pkey(ip)); collapsed.delete(pkey(cp)); render(); } },
+          tx === "array" ? `${x.length} item${x.length === 1 ? "" : "s"}` : `${Object.keys(x).length} fields`));
+      }
+      if (query && selfHit(it[c], c, query)) td.classList.add("hit");
+      tr.append(td);
+    });
+    tr.append(el("td", { class: "acts" },
+      el("button", { class: "icon", type: "button", title: "Duplicate row", "aria-label": "Duplicate row", html: SVG_DUP,
+        onclick: () => { v.splice(i + 1, 0, blankLike(v[i])); commit(); toast("Row duplicated"); } }),
+      el("button", { class: "icon del", type: "button", title: "Delete row", "aria-label": "Delete row", html: SVG_DEL,
+        onclick: () => { v.splice(i, 1); commit(); toast(`Deleted row ${i}. Undo to bring it back.`); } })));
+    body.append(tr);
+  });
+  table.append(body);
+  wrap.append(el("div", { class: "tablescroll" }, table));
+  if (!query) wrap.append(el("button", { class: "link", type: "button", onclick: () => { v.push(blankLike(v[v.length - 1])); commit(); toast("Row added at the bottom. Change its name and numbers."); } }, "+ Add row (copy of last)"));
+  const known = cols.filter(helpFor);
+  if (known.length) {
+    const dl = el("dl");
+    known.forEach(c => dl.append(el("dt", {}, c), el("dd", {}, helpFor(c))));
+    wrap.append(el("details", { class: "cols" }, el("summary", {}, "What do these columns mean?"), dl));
+  }
+  else if (!shown) wrap.append(el("div", { class: "hint" }, "No rows match the filter."));
+  return wrap;
+}
+function blankValue(x) { const t = typeOf(x); return t === "object" || t === "array" ? clone(x) : defaultFor(t); }
+/* A list of text values edited as one comma-separated box (e.g. tags, sub items). */
+function listEditor(arr, path) {
+  const inp = el("input", { class: "v str", type: "text", value: arr.join(", "), "aria-label": "List, separated by commas", title: "Separate entries with commas", spellcheck: "false" });
+  inp.addEventListener("input", () => setAt(path, inp.value.split(",").map(x => x.trim())));
+  inp.addEventListener("change", () => commit(false));
+  return inp;
+}
+function primitiveEditor(v, path) {
+  const t = typeOf(v), id = pkey(path);
+  if (t === "boolean") {
+    const cb = el("input", { type: "checkbox", ...(v ? { checked: "" } : {}) });
+    const txt = el("span", {}, String(v));
+    cb.addEventListener("change", () => { setAt(path, cb.checked); txt.textContent = String(cb.checked); commit(false); });
+    return [el("label", { class: "toggle" }, cb, txt)];
+  }
+  if (t === "null") {
+    // Empty values (null) stay null until someone types; a number typed here is saved as a number.
+    const inp = el("input", { class: "v num", type: "text", inputmode: "decimal", value: "", placeholder: "empty", "aria-label": "Empty value", title: "Empty (null). Type a value to fill it in.", spellcheck: "false" });
+    inp.addEventListener("input", () => {
+      const x = inp.value.trim();
+      setAt(path, x === "" ? null : NUM_RE.test(x) ? Number(x) : inp.value);
+    });
+    inp.addEventListener("change", () => commit(false));
+    return [inp];
+  }
+  if (t === "number") {
+    const inp = el("input", { class: "v num", type: "text", inputmode: "decimal", value: String(v), "aria-label": "Number", spellcheck: "false" });
+    inp.placeholder = "empty";
+    inp.addEventListener("input", () => {
+      if (inp.value.trim() === "") { inp.classList.remove("bad"); setAt(path, null); return; }
+      const ok = NUM_RE.test(inp.value);
+      inp.classList.toggle("bad", !ok);
+      if (ok) setAt(path, Number(inp.value));
+    });
+    inp.addEventListener("change", () => { if (inp.classList.contains("bad")) { inp.value = String(getAt(path)); inp.classList.remove("bad"); toast("That isn't a number, so the old value was kept"); } commit(false); });
+    inp.addEventListener("keydown", e => {
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      const cur = getAt(path) ?? 0, step = e.shiftKey ? 10 : (Number.isInteger(cur) ? 1 : 0.1);
+      const next = +(cur + (e.key === "ArrowUp" ? step : -step)).toFixed(6);
+      setAt(path, next); inp.value = String(next); commit(false);
+    });
+    return [inp];
+  }
+  // string
+  const long = v.length > 70 || v.includes("\n");
+  const inp = long ? el("textarea", { class: "v str", rows: Math.min(6, Math.max(2, Math.ceil(v.length / 70))), "aria-label": "Text", spellcheck: "false" })
+                   : el("input", { class: "v str", type: "text", "aria-label": "Text", spellcheck: "false" });
+  inp.value = v;
+  const out = [inp];
+  const sugg = !long && suggestionsFor(path);
+  if (sugg) inp.setAttribute("list", sugg);
+  let color;
+  const ue = parseUEColor(v);
+  if (ue) {
+    // Unreal struct text like (R=1,G=0.5,B=0,A=1): linear values, shown as sRGB in the picker.
+    const sw = el("input", { type: "color", class: "swatch", value: ueToHex(ue), "aria-label": "Pick color", title: "Pick color (alpha is kept)" });
+    sw.addEventListener("input", () => {
+      const cur = parseUEColor(getAt(path)) || ue;
+      const nv = hexToUE(sw.value, cur); inp.value = nv; setAt(path, nv);
+    });
+    sw.addEventListener("change", () => commit(false));
+    inp.addEventListener("input", () => { const c = parseUEColor(inp.value); if (c) sw.value = ueToHex(c); });
+    out.unshift(sw);
+  }
+  if (HEX.test(v)) {
+    color = el("input", { type: "color", class: "swatch", value: expandHex(v), "aria-label": "Pick color" });
+    color.addEventListener("input", () => { const nv = color.value.toUpperCase() + (v.length === 9 ? v.slice(7) : ""); inp.value = nv; setAt(path, nv); });
+    color.addEventListener("change", () => commit(false));
+    out.unshift(color);
+  }
+  inp.addEventListener("input", () => { setAt(path, inp.value); if (color && HEX.test(inp.value)) color.value = expandHex(inp.value); });
+  inp.addEventListener("change", () => commit(false));
+  return out;
+}
+function parseUEColor(s) {
+  const m = typeof s === "string" && s.trim().match(/^\((.*)\)$/);
+  if (!m) return null;
+  const parts = m[1].split(",").map(p => p.split("=").map(x => x.trim()));
+  if (parts.some(p => p.length !== 2 || !/^[RGBA]$/i.test(p[0]) || !isFinite(Number(p[1])) || p[1] === "")) return null;
+  const keys = parts.map(p => p[0].toUpperCase());
+  if (!["R", "G", "B"].every(c => keys.includes(c))) return null;
+  const vals = Object.fromEntries(parts.map(p => [p[0].toUpperCase(), Number(p[1])]));
+  // FColor (0-255, already sRGB) when any channel is above 1 and all are whole numbers; otherwise FLinearColor.
+  const byte = ["R", "G", "B"].some(c => vals[c] > 1) && ["R", "G", "B"].every(c => Number.isInteger(vals[c]));
+  return { order: parts.map(p => p[0]), vals, byte };
+}
+const lin2srgb = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+const srgb2lin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+function ueToHex(c) {
+  return "#" + ["R", "G", "B"].map(k => {
+    let x = c.byte ? c.vals[k] / 255 : lin2srgb(Math.max(0, Math.min(1, c.vals[k])));
+    return Math.round(Math.max(0, Math.min(1, x)) * 255).toString(16).padStart(2, "0");
+  }).join("");
+}
+function hexToUE(hex, c) {
+  const vals = { ...c.vals };
+  ["R", "G", "B"].forEach((k, i) => {
+    const x = parseInt(hex.substr(1 + i * 2, 2), 16) / 255;
+    vals[k] = c.byte ? Math.round(x * 255) : +srgb2lin(x).toFixed(4);
+  });
+  return "(" + c.order.map(k => `${k}=${vals[k.toUpperCase()]}`).join(",") + ")";
+}
+
+/* Suggest values for text fields that repeat a small set of values (icons, units, categories). */
+let suggestions = new Map();
+function buildSuggestions() {
+  const seen = new Map();
+  (function walk(v) {
+    const t = typeOf(v);
+    if (t === "array") v.forEach(walk);
+    else if (t === "object") for (const [k, x] of Object.entries(v)) {
+      if (typeof x === "string" && x && x.length <= 60) { if (!seen.has(k)) seen.set(k, { n: 0, vals: new Set() }); const e = seen.get(k); e.n++; e.vals.add(x); }
+      else walk(x);
+    }
+  })(data);
+  const host = $("datalists"); host.textContent = ""; suggestions = new Map();
+  let i = 0;
+  for (const [k, e] of seen) {
+    if (e.n < 3 || e.vals.size > 40 || e.vals.size === e.n) continue;
+    const id = "dl" + (i++);
+    const dl = el("datalist", { id });
+    [...e.vals].sort((a, b) => a.localeCompare(b)).forEach(x => dl.append(el("option", { value: x })));
+    host.append(dl); suggestions.set(k, id);
+  }
+}
+function suggestionsFor(path) {
+  const k = path[path.length - 1];
+  return typeof k === "string" ? suggestions.get(k) : null;
+}
+function expandHex(h) {
+  h = h.slice(1);
+  if (h.length === 3) h = h.split("").map(c => c + c).join("");
+  return "#" + h.slice(0, 6).toLowerCase();
+}
+
+function vectorEditor(v, path) {
+  const wrap = el("div", { class: "vec" });
+  if (isColorObj(v)) {
+    const keys = Object.keys(v); const find = c => keys.find(k => k.toUpperCase() === c);
+    const scale = keys.every(k => v[k] <= 1) ? 1 : 255;
+    const toHex = () => "#" + ["R", "G", "B"].map(c => Math.round(Math.max(0, Math.min(1, getAt(path)[find(c)] / scale)) * 255).toString(16).padStart(2, "0")).join("");
+    const sw = el("input", { type: "color", class: "swatch", value: toHex(), "aria-label": "Pick color" });
+    sw.addEventListener("input", () => {
+      const hx = sw.value; const o = getAt(path);
+      ["R", "G", "B"].forEach((c, i) => {
+        const n = parseInt(hx.substr(1 + i * 2, 2), 16) / 255 * scale;
+        o[find(c)] = scale === 1 ? +n.toFixed(4) : Math.round(n);
+        const fi = wrap.querySelector(`[data-k="${find(c)}"]`); if (fi) fi.value = String(o[find(c)]);
+      });
+    });
+    sw.addEventListener("change", () => commit(false));
+    wrap.append(sw);
+    wrap._sync = () => sw.value = toHex();
+  }
+  for (const k of Object.keys(v)) {
+    const inp = el("input", { class: "v num", type: "text", inputmode: "decimal", value: String(v[k]), "data-k": k, "aria-label": k, spellcheck: "false" });
+    inp.addEventListener("input", () => {
+      const ok = /^\s*-?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?\s*$/i.test(inp.value);
+      inp.classList.toggle("bad", !ok);
+      if (ok) { getAt(path)[k] = Number(inp.value); wrap._sync && wrap._sync(); }
+    });
+    inp.addEventListener("change", () => { if (inp.classList.contains("bad")) { inp.value = String(getAt(path)[k]); inp.classList.remove("bad"); } commit(false); });
+    wrap.append(el("label", {}, k, inp));
+  }
+  return wrap;
+}
+
+function addRow(v, path, depth) {
+  const row = el("div", { class: "addrow", style: `--depth:${depth}` });
+  if (Array.isArray(v)) {
+    const label = v.length ? "+ Add item (copy of last)" : "+ Add item";
+    const typeSel = v.length ? null : typeSelect();
+    row.append(el("button", { class: "link", type: "button", onclick: () => {
+      v.push(v.length ? blankLike(v[v.length - 1]) : defaultFor(typeSel.value));
+      collapsed.delete(pkey(path)); commit();
+    } }, label));
+    if (typeSel) row.append(typeSel);
+    return row;
+  }
+  const btn = el("button", { class: "link", type: "button" }, "+ Add field");
+  btn.addEventListener("click", () => {
+    row.textContent = "";
+    const name = el("input", { placeholder: "Field name", "aria-label": "New field name" });
+    const sel = typeSelect();
+    const go = () => {
+      const k = name.value.trim();
+      if (!k) { name.focus(); return; }
+      if (Object.prototype.hasOwnProperty.call(v, k)) { toast(`“${k}” already exists here`); name.focus(); return; }
+      v[k] = defaultFor(sel.value); collapsed.delete(pkey(path)); commit();
+      const ni = document.querySelector(`[data-path='${CSS.escape(pkey([...path, k]))}'] .valcell input, [data-path='${CSS.escape(pkey([...path, k]))}'] .valcell textarea`);
+      ni && ni.focus();
+    };
+    name.addEventListener("keydown", e => { if (e.key === "Enter") go(); if (e.key === "Escape") render(); });
+    row.append(name, sel, el("button", { class: "btn", type: "button", onclick: go }, "Add"), el("button", { class: "link", type: "button", onclick: render }, "Cancel"));
+    name.focus();
+  });
+  row.append(btn);
+  return row;
+}
+function typeSelect() {
+  const s = el("select", { "aria-label": "Type" });
+  for (const [val, lab] of [["string", "Text"], ["number", "Number"], ["boolean", "On/Off"], ["object", "Group"], ["array", "List"], ["null", "Empty"]]) s.append(el("option", { value: val }, lab));
+  return s;
+}
+function maxId(key) {
+  let m = 0;
+  (function walk(v) { const t = typeOf(v); if (t === "array") v.forEach(walk); else if (t === "object") for (const [k, x] of Object.entries(v)) { if (k === key && Number.isInteger(x)) m = Math.max(m, x); else walk(x); } })(data);
+  return m;
+}
+function defaultFor(t) { return { string: "", number: 0, boolean: false, null: null, object: {}, array: [] }[t]; }
+function blankLike(v) {
+  // Copies the previous item so new rows keep the same shape artists expect in Unreal.
+  const c = clone(v);
+  if (typeOf(c) === "object") {
+    for (const k of ["Name", "name", "title", "Title", "RowName"]) if (typeof c[k] === "string") { c[k] = c[k] + " copy"; break; }
+    // Give numeric ids a fresh value so the new entry doesn't clash with an existing one.
+    for (const k of Object.keys(c)) if (/^id$|_id$|Id$/.test(k) && Number.isInteger(c[k])) c[k] = maxId(k) + 1;
+  }
+  return c;
+}
+function convert(v, t) {
+  const from = typeOf(v);
+  if (from === t) return v;
+  switch (t) {
+    case "string": return from === "object" || from === "array" ? JSON.stringify(v) : v === null ? "" : String(v);
+    case "number": { const n = Number(v); return from === "boolean" ? +v : isFinite(n) && v !== "" && v !== null ? n : 0; }
+    case "boolean": return from === "string" ? v.toLowerCase() === "true" : !!v && from !== "null";
+    case "null": return null;
+    case "object": return {};
+    case "array": return v === null ? [] : [v];
+  }
+}
+function renameKey(path, nk, input) {
+  const ok = path[path.length - 1];
+  if (nk === ok) return;
+  const parent = getAt(path.slice(0, -1));
+  if (!nk) { input.value = ok; toast("A field needs a name"); return; }
+  if (Object.prototype.hasOwnProperty.call(parent, nk)) { input.value = ok; toast(`“${nk}” already exists here`); return; }
+  // rebuild to keep field order stable
+  const entries = Object.entries(parent).map(([k, val]) => [k === ok ? nk : k, val]);
+  for (const k of Object.keys(parent)) delete parent[k];
+  for (const [k, val] of entries) parent[k] = val;
+  commit();
+}
+function refreshMarks() {
+  document.querySelectorAll(".row[data-path], td[data-path], .ctl[data-path]").forEach(r => r.classList.toggle("changed", changed.has(r.dataset.path)));
+}
+
+/* ---------- raw tab ---------- */
+function syncRaw() { $("raw").value = serialize(); $("rawMsg").textContent = "Edit the text directly, then apply it to the fields view."; $("rawMsg").className = "msg"; }
+$("rawApply").addEventListener("click", () => {
+  const txt = $("raw").value;
+  try { data = JSON.parse(txt); commit(); $("rawMsg").textContent = "Applied. The fields view is up to date."; $("rawMsg").className = "msg"; }
+  catch (e) { $("rawMsg").textContent = "Not valid JSON: " + parseError(txt, e); $("rawMsg").className = "msg err"; }
+});
+$("rawReset").addEventListener("click", syncRaw);
+function setTab(which) {
+  if (which === "cats" && !catSource()) which = "tree";
+  view = which;
+  const raw = which === "raw";
+  $("tabCats").setAttribute("aria-selected", String(which === "cats"));
+  $("tabTree").setAttribute("aria-selected", String(which === "tree"));
+  $("tabRaw").setAttribute("aria-selected", String(raw));
+  $("catPanel").hidden = which !== "cats"; $("treePanel").hidden = which !== "tree"; $("rawPanel").hidden = !raw;
+  $("search").disabled = raw; $("expandAll").hidden = which !== "tree"; $("collapseAll").hidden = which !== "tree";
+  if (raw) syncRaw(); else render();
+}
+$("tabCats").addEventListener("click", () => setTab("cats"));
+$("tabTree").addEventListener("click", () => setTab("tree"));
+$("tabRaw").addEventListener("click", () => setTab("raw"));
+
+/* ---------- categories view ---------- */
+// Files whose main list holds categories (amenities, locations) get a friendlier view.
+function catSource() {
+  const isCats = a => Array.isArray(a) && a.length > 0 && a.every(x => typeOf(x) === "object") && a.some(x => "category" in x || "category_id" in x);
+  if (isCats(data)) return { arr: data, path: [] };
+  if (typeOf(data) === "object") for (const [k, v] of Object.entries(data)) if (isCats(v)) return { arr: v, path: [k] };
+  return null;
+}
+const EMOJI = /\p{Extended_Pictographic}/u;
+function catBadge(c, i) {
+  const icon = typeof c.icon === "string" && EMOJI.test(c.icon) ? c.icon : "";
+  const name = String(c.category ?? c.title ?? c.name ?? `#${i}`);
+  const b = el("span", { class: "cat-badge", "aria-hidden": "true" }, icon || name.trim().charAt(0).toUpperCase() || "#");
+  return b;
+}
+function catCount(c) {
+  let n = 0; const walk = x => { if (typeOf(x) !== "object") return; if (Array.isArray(x.items)) n += x.items.length; if (Array.isArray(x.sub_category)) x.sub_category.forEach(walk); };
+  walk(c);
+  const groups = Array.isArray(c.sub_category) ? `${c.sub_category.length} group${c.sub_category.length === 1 ? "" : "s"} · ` : "";
+  return `${groups}${n} item${n === 1 ? "" : "s"}`;
+}
+function freshCategory(src) {
+  const next = {}; const bump = k => (next[k] = (next[k] ?? maxId(k)) + 1);
+  const walk = (v, k) => {
+    const t = typeOf(v);
+    if (t === "array") { const objs = v.filter(x => typeOf(x) === "object"); return objs.length ? [walk(objs[0], null)] : v.slice(0, 1).map(x => typeof x === "string" ? "" : x); }
+    if (t === "object") { const o = {}; for (const [kk, x] of Object.entries(v)) o[kk] = walk(x, kk); return o; }
+    if (k && /^id$|_id$|Id$/.test(k) && Number.isInteger(v)) return bump(k);
+    if (t === "string") return k === "category" ? "New category" : (/^(unit|icon|color)$/i.test(k || "") || parseUEColor(v)) ? v : "";
+    return v;
+  };
+  return walk(src, null);
+}
+function tipsBox() {
+  if (store.get("ued.tips.hidden") === "1") return null;
+  const box = el("div", { class: "tips" },
+    el("div", { class: "tips-head" }, el("span", {}, "How to edit"), el("button", { class: "link", type: "button", onclick: () => { store.set("ued.tips.hidden", "1"); render(); } }, "Hide tips")));
+  const ul = el("ul");
+  [
+    ["New category: ", "click + New category under the list, then type its name."],
+    ["New place or amenity: ", "open its category and click + Add row under the items."],
+    ["Remove: ", "click the bin icon. Undo brings it back."],
+    ["Colors and icons: ", "click the colored square, or pick an icon from the suggestions."],
+    ["Save: ", "click Save JSON when you're done. Changed fields show in amber."],
+    ["More help: ", "click Help at the top, including how to copy map coordinates."]
+  ].forEach(([b, t]) => ul.append(el("li", {}, el("b", {}, b), t)));
+  box.append(ul);
+  return box;
+}
+function renderCats() {
+  const src = catSource(), host = $("catPanel"); const scroll = window.scrollY;
+  host.textContent = "";
+  const { arr, path } = src;
+  if (activeCat >= arr.length) activeCat = arr.length - 1;
+  if (activeCat < 0) activeCat = 0;
+  const tips = tipsBox(); if (tips) host.append(tips);
+
+  const list = el("nav", { class: "cat-list", "aria-label": "Categories" }, el("div", { class: "eyebrow" }, `Categories (${arr.length})`));
+  arr.forEach((c, i) => {
+    if (query && !matches(c, i, query)) return;
+    const cp = pkey([...path, i]);
+    const isChanged = [...changed].some(k => k === cp || k.startsWith(cp.slice(0, -1) + ","));
+    const b = el("button", { class: "cat-item" + (isChanged ? " changed" : ""), type: "button", "aria-current": String(i === activeCat) },
+      catBadge(c, i), el("span", { class: "cat-txt" }, el("span", { class: "cat-name" }, String(c.category ?? c.title ?? c.name ?? `Category ${i + 1}`)), el("span", { class: "cat-sub" }, catCount(c))));
+    b.addEventListener("click", () => { activeCat = i; render(); });
+    list.append(b);
+  });
+  if (!query) list.append(el("button", { class: "cat-new", type: "button", onclick: () => {
+    arr.push(freshCategory(arr[arr.length - 1])); activeCat = arr.length - 1; commit();
+    toast("New category added. Type its name, then fill in its items.");
+    const ctls = [...$("catPanel").querySelectorAll(".cat-detail .form .ctl")];
+    const nameCtl = ctls.find(c => /"(category|title|name)"\]$/.test(c.dataset.path)) || ctls[0];
+    const first = nameCtl && nameCtl.querySelector("input, textarea"); if (first) { first.focus(); first.select(); }
+  } }, "+ New category"));
+
+  const c = arr[activeCat], cpath = [...path, activeCat];
+  const detail = el("section", { class: "cat-detail" });
+  const title = String(c.category ?? c.title ?? c.name ?? `Category ${activeCat + 1}`);
+  detail.append(el("div", { class: "cat-title" },
+    el("h2", {}, catBadge(c, activeCat), title || "Untitled category"),
+    el("div", { class: "cat-actions" },
+      el("button", { class: "btn", type: "button", disabled: activeCat === 0 ? "" : null, title: "Move up in the list", onclick: () => { arr.splice(activeCat - 1, 0, arr.splice(activeCat, 1)[0]); activeCat--; commit(); } }, "Move up"),
+      el("button", { class: "btn", type: "button", disabled: activeCat === arr.length - 1 ? "" : null, title: "Move down in the list", onclick: () => { arr.splice(activeCat + 1, 0, arr.splice(activeCat, 1)[0]); activeCat++; commit(); } }, "Move down"),
+      el("button", { class: "btn", type: "button", onclick: () => { arr.splice(activeCat + 1, 0, blankLike(c)); activeCat++; commit(); toast("Category duplicated"); } }, "Duplicate"),
+      el("button", { class: "btn danger", type: "button", onclick: () => { arr.splice(activeCat, 1); commit(); toast(`Deleted “${title}”. Undo to bring it back.`); } }, "Delete"))));
+
+  // simple fields first, as a labelled form
+  const form = el("div", { class: "form" });
+  const nested = [];
+  for (const [k, v] of Object.entries(c)) {
+    const t = typeOf(v), fp = [...cpath, k];
+    if ((t === "object" || t === "array") && !isVector(v) && !(t === "array" && v.every(z => typeof z === "string"))) { nested.push(k); continue; }
+    const ctl = el("div", { class: "ctl" + (changed.has(pkey(fp)) ? " changed" : ""), "data-path": pkey(fp) });
+    if (isVector(v)) ctl.append(vectorEditor(v, fp));
+    else if (t === "array") ctl.append(listEditor(v, fp));
+    else ctl.append(...primitiveEditor(v, fp));
+    const h = helpFor(k);
+    form.append(el("label", { class: "lab" }, el("b", {}, prettyName(k)), h ? el("span", {}, h) : null), ctl);
+  }
+  detail.append(el("div", { class: "sect" }, el("h3", {}, "Details"), form));
+
+  // lists inside the category (items, sub categories)
+  for (const k of nested) {
+    const v = c[k], fp = [...cpath, k];
+    const count = Array.isArray(v) ? ` (${v.length})` : "";
+    const sect = el("div", { class: "sect" }, el("h3", {}, prettyName(k) + count));
+    const h = helpFor(k); if (h) sect.append(el("p", { class: "hint" }, h));
+    if (Array.isArray(v) && isTableMode(v, pkey(fp))) sect.append(renderTable(v, fp, 0));
+    else {
+      const tree = el("div", { class: "tree" });
+      if (typeOf(v) === "object" || Array.isArray(v)) { renderChildren(tree, v, fp, 0); if (!query) tree.append(addRow(v, fp, 0)); }
+      sect.append(tree);
+    }
+    detail.append(sect);
+  }
+  host.append(el("div", { class: "cat-layout" }, list, detail));
+  window.scrollTo(0, scroll);
+}
+
+/* ---------- toolbar ---------- */
+/* When the page runs as a plain file in Chrome or Edge, it can write straight back to the JSON file it opened. */
+let fileHandle = null;
+const canWriteBack = (() => { try { return window.top === window && "showOpenFilePicker" in window && !(window.claude && window.claude.use); } catch { return false; } })();
+async function openFile() {
+  if (canWriteBack) {
+    try {
+      const [h] = await window.showOpenFilePicker({ types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
+      readFile(await h.getFile(), h); return;
+    } catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  $("fileInput").value = ""; $("fileInput").click();
+}
+$("openBtn").addEventListener("click", openFile);
+$("fileInput").addEventListener("change", () => { const f = $("fileInput").files[0]; if (f) readFile(f); });
+function readFile(f, handle = null, after = null) {
+  const r = new FileReader();
+  r.onload = () => {
+    if (!load(String(r.result).replace(/^﻿/, ""), f.name)) return;
+    fileHandle = handle;
+    if (after) after();
+    else { if (project && project.name === null) { activeIdx = -1; markActiveCard(); } toast(handle ? `Opened ${f.name}. Save writes straight back to it.` : `Opened ${f.name}`); }
+  };
+  r.onerror = () => showError(`Couldn't read ${f.name}. Try opening it again.`);
+  r.readAsText(f);
+}
+$("pasteBtn").addEventListener("click", () => { $("pasteModal").hidden = false; $("pasteText").value = ""; $("pasteText").focus(); });
+$("pasteCancel").addEventListener("click", () => $("pasteModal").hidden = true);
+$("pasteOk").addEventListener("click", () => {
+  const txt = $("pasteText").value.trim();
+  if (!txt) return;
+  try { JSON.parse(txt); } catch (e) { toast("Not valid JSON: " + parseError(txt, e)); return; }
+  $("pasteModal").hidden = true; load(txt + "\n", isExample ? "data.json" : fileName); toast("Loaded pasted JSON");
+});
+$("undoBtn").addEventListener("click", undo);
+$("errClose").addEventListener("click", () => $("errBanner").hidden = true);
+$("expandAll").addEventListener("click", () => { collapsed.clear(); render(); });
+$("collapseAll").addEventListener("click", () => {
+  collapsed.clear();
+  (function walk(v, p) { const t = typeOf(v); if (t !== "object" && t !== "array") return; if (p.length) collapsed.add(pkey(p)); Object.keys(v).forEach(k => walk(v[k], [...p, t === "array" ? +k : k])); })(data, []);
+  render();
+});
+let searchTimer;
+$("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { query = $("search").value.trim().toLowerCase(); render(); }, 120); });
+
+function flushActive() { const a = document.activeElement; if (a && a.matches && a.matches(".v, .k-input")) a.blur(); }
+function showCopyModal() { $("copyText").value = serialize(); $("copyModal").hidden = false; $("copyText").focus(); $("copyText").select(); }
+$("copyClose").addEventListener("click", () => $("copyModal").hidden = true);
+$("copyBtn").addEventListener("click", () => {
+  flushActive();
+  const text = serialize();
+  try {
+    navigator.clipboard.writeText(text).then(() => toast("Copied the JSON. Paste it into your file."), showCopyModal);
+  } catch { showCopyModal(); }
+});
+
+let downloads = null;
+$("saveBtn").addEventListener("click", () => doSave());
+async function doSave() {
+  flushActive();
+  const name = /\.json$/i.test(fileName) ? fileName : fileName + ".json";
+  const text = serialize();
+  const saved = msg => {
+    // Saved: treat the saved text as the new baseline.
+    original = text; origFlat = flatten(data); isExample = false; undoStack = []; committed = JSON.stringify(data);
+    computeChanged(); render(); updateHeader(); store.del(DRAFT_KEY);
+    project && project.files[activeIdx] && refreshCard(activeIdx); toast(msg);
+  };
+  const cf = project && project.cloud && activeIdx >= 0 ? project.files[activeIdx] : null;
+  if (cf && cf.cloudPath && !isExample) {
+    try {
+      $("saveBtn").disabled = true;
+      const res = await gh(cf.cloudPath, { method: "PUT", body: { message: `Update ${cf.path} (${project.name}) from Unreal Data Editor`, content: toB64(text), sha: cf.sha, branch: cloud.branch } });
+      cf.sha = res.content.sha;
+      saved(`Saved to the cloud. The streamed app gets it within about 5 minutes.`);
+    } catch (e) {
+      showError(e.status === 409 || e.status === 422
+        ? `Someone else saved ${cf.path} after you opened it, so your save was stopped. Click Copy JSON to keep your version, reopen the file, and redo your changes.`
+        : cloudError(e, cf.path));
+    } finally { $("saveBtn").disabled = false; }
+    return;
+  }
+  if (!downloads && window.claude && window.claude.use) { showCopyModal(); return; }
+  if (!downloads) {
+    // Standalone file: write back to the opened file, ask where to save, or fall back to a normal download.
+    try {
+      if (!fileHandle && canWriteBack && "showSaveFilePicker" in window)
+        fileHandle = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
+      if (fileHandle) {
+        const w = await fileHandle.createWritable(); await w.write(text); await w.close();
+        fileName = fileHandle.name; $("fname").textContent = fileName;
+        saved(`Saved ${fileName}`); return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") { toast("Save cancelled"); return; } }
+    try {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([text], { type: "application/json" })); a.download = name;
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      saved(`Downloaded ${name}. Replace the file in your Unreal project with it.`);
+    } catch { showCopyModal(); }
+    return;
+  }
+  try {
+    await downloads.save({ filename: name, data: text });
+    saved(`Saved ${name}. Replace the file in your Unreal project with it.`);
+  } catch (e) {
+    if (e && e.code === "declined") toast("Save cancelled");
+    else if (e && e.code === "rate_limited") toast("A save prompt is already open");
+    else showCopyModal();
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
+    const a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) return;
+    e.preventDefault(); undo();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); $("saveBtn").click(); }
+  if (e.key === "Escape") { $("pasteModal").hidden = true; $("copyModal").hidden = true; $("helpModal").hidden = true; $("cloudModal").hidden = true; }
+});
+
+/* drag & drop */
+let dragDepth = 0;
+window.addEventListener("dragenter", e => { if ([...(e.dataTransfer?.types || [])].includes("Files")) { dragDepth++; $("drop").hidden = false; e.preventDefault(); } });
+window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; $("drop").hidden = true; } });
+window.addEventListener("drop", e => {
+  e.preventDefault(); dragDepth = 0; $("drop").hidden = true;
+  const item = e.dataTransfer?.items?.[0];
+  const f = e.dataTransfer?.files?.[0]; if (!f) return;
+  if (canWriteBack && item && item.getAsFileSystemHandle) item.getAsFileSystemHandle().then(h => readFile(f, h && h.kind === "file" ? h : null), () => readFile(f));
+  else readFile(f);
+});
+
+/* ---------- projects ---------- */
+// A project is one data folder; its JSON files show as cards. Reference copies show until a folder is chosen.
+let project = null, activeIdx = -1, pendingOpen = null;
+const SKIP_DIRS = new Set(["Intermediate", "Saved", "DerivedDataCache", "Binaries", "Build", "node_modules", "Plugins", "__MACOSX"]);
+const ICONS = {
+  amen: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6M3 20h18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>',
+  loc: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  doc: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>'
+};
+function prettyName(n) {
+  const b = n.replace(/\.json$/i, "").replace(/[_\-]+/g, " ").replace(/([a-z])(\d)/gi, "$1 $2").trim();
+  return b.charAt(0).toUpperCase() + b.slice(1);
+}
+function iconFor(n) { return /amenit/i.test(n) ? ICONS.amen : /locat|place|poi/i.test(n) ? ICONS.loc : ICONS.doc; }
+function summarize(d) {
+  const top = Array.isArray(d) ? d : typeOf(d) === "object" ? (Object.values(d).find(Array.isArray) || null) : null;
+  if (!top) return typeOf(d) === "object" ? `${Object.keys(d).length} fields` : "";
+  let items = 0;
+  const countItems = x => { if (typeOf(x) !== "object") return; if (Array.isArray(x.items)) items += x.items.length; if (Array.isArray(x.sub_category)) x.sub_category.forEach(countItems); };
+  top.forEach(countItems);
+  const cats = `${top.length} ${top.every(x => typeOf(x) === "object" && ("category" in x || "category_id" in x)) ? "categor" + (top.length === 1 ? "y" : "ies") : "entr" + (top.length === 1 ? "y" : "ies")}`;
+  return items ? `${cats} · ${items} items` : cats;
+}
+function renderCards() {
+  const host = $("cards"); host.textContent = "";
+  if (!project.files.length) { host.append(el("div", { class: "hint" }, "No JSON files found in this folder. Choose the folder that holds the amenities and location files.")); return; }
+  project.files.forEach((f, i) => {
+    const s = el("span", { class: "s" + (f.error ? " bad" : "") }, f.error || f.summary || "");
+    const card = el("button", { class: "card", type: "button", "aria-current": String(i === activeIdx), title: f.path },
+      el("span", { class: "ic", html: iconFor(f.name) }),
+      el("span", { class: "meta" }, el("span", { class: "t" }, prettyName(f.name)), el("span", { class: "f" }, f.path), s));
+    card.addEventListener("click", () => requestOpen(i));
+    host.append(card);
+  });
+  markActiveCard();
+}
+function markActiveCard() {
+  if (!project) return;
+  [...$("cards").querySelectorAll(".card")].forEach((c, i) => {
+    c.setAttribute("aria-current", String(i === activeIdx));
+    const s = c.querySelector(".s"), f = project.files[i];
+    if (i === activeIdx && changed.size && !isExample) { s.className = "s dirty"; s.textContent = `${changed.size} unsaved change${changed.size === 1 ? "" : "s"}`; }
+    else { s.className = "s" + (f.error ? " bad" : ""); s.textContent = f.error || f.summary || ""; }
+  });
+}
+function refreshCard(i) { const f = project.files[i]; f.summary = summarize(data); f.error = ""; markActiveCard(); }
+async function readText(f) {
+  if (f.cloudPath) { const j = await gh(f.cloudPath); f.sha = j.sha; return fromB64(j.content || ""); }
+  const file = f.handle ? await f.handle.getFile() : f.file;
+  return (await file.text()).replace(/^\ufeff/, "");
+}
+async function setProject(name, where, files, isCloud = false) {
+  files.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
+  project = { name, files, cloud: isCloud }; activeIdx = -1;
+  for (const f of files) {
+    try { f.summary = summarize(JSON.parse(await readText(f))); }
+    catch { f.error = "Can't read: not valid JSON"; }
+  }
+  $("projName").textContent = name; $("projPath").textContent = where;
+  if (!isCloud && cloud) renderCloudRow();
+  $("chooseProject").textContent = "Change project…";
+  $("cardsNote").textContent = files.length ? "Pick a file to edit it." : "";
+  renderCards();
+  const first = files.findIndex(f => !f.error);
+  if (first >= 0) openCard(first);
+}
+function showReferenceCopies() {
+  const names = Object.keys(SAMPLES);
+  project = { name: null, files: names.map(n => ({ name: n, path: n, sample: true, summary: summarize(JSON.parse(SAMPLES[n])) })) };
+  renderCards();
+  $("cardsNote").textContent = "These are reference copies shared on 8 Oct 2026, for trying the editor. Choose your project folder to edit the real files.";
+  openCard(0);
+}
+async function openCard(i) {
+  const f = project.files[i];
+  if (f.sample) { load(SAMPLES[f.name], f.name, { example: true, keepDraft: true }); activeIdx = i; markActiveCard(); showLiveUrl(); return; }
+  try {
+    const text = await readText(f);
+    if (!load(text, f.name)) return;
+    fileHandle = f.handle || null; activeIdx = i; markActiveCard(); showLiveUrl();
+  } catch (e) { showError(f.cloudPath ? cloudError(e, f.path) : `Couldn't read ${f.path}. It may have been moved or renamed; choose the project folder again.`); }
+}
+function requestOpen(i) {
+  if (i === activeIdx) return;
+  if (changed.size && !isExample) {
+    pendingOpen = i;
+    $("switchText").textContent = `${prettyName(fileName)} has ${changed.size} unsaved change${changed.size === 1 ? "" : "s"}.`;
+    $("switchBanner").hidden = false; return;
+  }
+  openCard(i);
+}
+$("switchStay").addEventListener("click", () => { pendingOpen = null; $("switchBanner").hidden = true; });
+$("switchGo").addEventListener("click", () => { $("switchBanner").hidden = true; const i = pendingOpen; pendingOpen = null; if (i != null) openCard(i); });
+$("switchSave").addEventListener("click", async () => {
+  $("switchBanner").hidden = true; const i = pendingOpen; pendingOpen = null;
+  await doSave(); if (i != null && !changed.size) openCard(i);
+});
+
+async function scanDir(dir, prefix = "", depth = 0, out = []) {
+  for await (const [n, h] of dir.entries()) {
+    if (out.length >= 200) break;
+    if (h.kind === "file" && /\.json$/i.test(n)) out.push({ name: n, path: prefix + n, handle: h });
+    else if (h.kind === "directory" && depth < 3 && !SKIP_DIRS.has(n) && !n.startsWith(".")) await scanDir(h, prefix + n + "/", depth + 1, out);
+  }
+  return out;
+}
+const canPickDir = (() => { try { return canWriteBack && "showDirectoryPicker" in window; } catch { return false; } })();
+async function openDirHandle(dir) {
+  await setProject(dir.name, "Saving writes straight back into this folder.", await scanDir(dir));
+  rememberProject(dir);
+}
+$("chooseProject").addEventListener("click", async () => {
+  if (canPickDir) {
+    try { await openDirHandle(await window.showDirectoryPicker({ id: "unreal-data", mode: "readwrite" })); return; }
+    catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  $("dirInput").value = ""; $("dirInput").click();
+});
+$("dirInput").addEventListener("change", () => {
+  const all = [...$("dirInput").files];
+  if (!all.length) return;
+  const root = (all[0].webkitRelativePath || all[0].name).split("/")[0];
+  const files = all.filter(f => /\.json$/i.test(f.name)).map(f => {
+    const parts = (f.webkitRelativePath || f.name).split("/");
+    return { name: f.name, path: parts.slice(1).join("/") || f.name, file: f, parts };
+  }).filter(f => f.parts.length <= 5 && !f.parts.slice(1, -1).some(p => SKIP_DIRS.has(p) || p.startsWith("."))).slice(0, 200);
+  setProject(root, "Save gives you the updated file to put back in this folder.", files);
+});
+
+/* Recent projects: folder access is kept by the browser (Chrome and Edge), so artists can switch with one click. */
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("unreal-data-editor", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("recent");
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function recentList() {
+  try { const db = await idb(); return await new Promise(res => { const q = db.transaction("recent").objectStore("recent").get("list"); q.onsuccess = () => res(q.result || []); q.onerror = () => res([]); }); }
+  catch { return []; }
+}
+async function rememberProject(dir) {
+  try {
+    const list = await recentList();
+    const keep = [];
+    for (const r of list) if (!(await r.handle.isSameEntry(dir))) keep.push(r);
+    const next = [{ name: dir.name, handle: dir, at: Date.now() }, ...keep].slice(0, 8);
+    const db = await idb(); db.transaction("recent", "readwrite").objectStore("recent").put(next, "list");
+    showRecent(next);
+  } catch {}
+}
+async function showRecent(list) {
+  if (!canPickDir) return;
+  list = list || await recentList();
+  const row = $("recentRow"), chips = $("recentChips"); chips.textContent = "";
+  row.hidden = !list.length;
+  list.forEach(r => chips.append(el("button", { class: "chip", type: "button", title: "Open this project", onclick: async () => {
+    try {
+      if ((await r.handle.requestPermission({ mode: "readwrite" })) !== "granted") { toast("The browser needs permission to open that folder"); return; }
+      await openDirHandle(r.handle);
+    } catch { toast(`Couldn't open ${r.name}. Choose the folder again.`); }
+  } }, r.name)));
+}
+
+/* ---------- cloud (GitHub) ---------- */
+// The editor saves into a public GitHub repository; the streamed Unreal build downloads the files from it.
+// Browsers block this inside the claude.ai page, so it works in the downloaded or GitHub Pages copy.
+const CLOUD_KEY = "ued.cloud.v1";
+const canCloud = !(window.claude && window.claude.use);
+let cloud = null;
+try { cloud = JSON.parse(store.get(CLOUD_KEY) || "null"); } catch { cloud = null; }
+const encPath = p => p.split("/").filter(Boolean).map(encodeURIComponent).join("/");
+function toB64(text) {
+  const bytes = new TextEncoder().encode(text); let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function fromB64(b) { const bin = atob(b.replace(/\s/g, "")); return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))).replace(/^﻿/, ""); }
+async function gh(path, opts = {}) {
+  const url = `https://api.github.com/repos/${cloud.repo}/contents/${encPath(path)}` + (opts.method ? "" : `?ref=${encodeURIComponent(cloud.branch)}`);
+  let r;
+  try {
+    r = await fetch(url, { method: opts.method || "GET", cache: "no-store",
+      headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${cloud.token}`, "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) },
+      body: opts.body ? JSON.stringify(opts.body) : undefined });
+  } catch { const e = new Error("network"); e.status = 0; throw e; }
+  if (!r.ok) { const e = new Error("http " + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+function cloudError(e, what) {
+  if (e.status === 0) return "Couldn't reach GitHub. Check the internet connection and try again.";
+  if (e.status === 401) return "GitHub refused the access key. Open Cloud settings and paste a current key.";
+  if (e.status === 403) return "The access key can't change this repository. Give it Contents: Read and write for this repository.";
+  if (e.status === 404) return `GitHub couldn't find ${what}. Check the repository name, branch and projects folder in Cloud settings.`;
+  return `GitHub returned an error (${e.status}) for ${what}. Try again in a minute.`;
+}
+const dataRoot = () => (cloud.dir || "").replace(/^\/+|\/+$/g, "");
+const join = (...p) => p.filter(Boolean).join("/");
+function rawUrl(path) { return `https://raw.githubusercontent.com/${cloud.repo}/${encodeURIComponent(cloud.branch)}/${encPath(path)}`; }
+function showLiveUrl() {
+  const f = project && activeIdx >= 0 ? project.files[activeIdx] : null;
+  const on = !!(f && f.cloudPath);
+  $("liveUrl").hidden = !on;
+  if (on) $("liveUrlText").textContent = rawUrl(f.cloudPath);
+}
+$("liveUrlCopy").addEventListener("click", () => {
+  const t = $("liveUrlText").textContent;
+  try { navigator.clipboard.writeText(t).then(() => toast("Link copied"), () => toast("Select the link and copy it")); } catch { toast("Select the link and copy it"); }
+});
+let cloudProjects = [];
+async function renderCloudRow() {
+  const row = $("cloudRow"); row.textContent = "";
+  const tag = el("span", { class: "tag", html: '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 9.1 4.5 4.5 0 0 0 7 18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' });
+  if (!canCloud) {
+    row.append(tag); tag.append("Cloud");
+    row.append(el("span", { class: "hint" }, "Saving for the streamed app works in the downloaded or GitHub Pages copy of this editor. See Help."));
+    return;
+  }
+  if (!cloud) {
+    row.append(el("button", { class: "btn", type: "button", onclick: openCloudSettings }, "Connect cloud for the streamed app…"));
+    return;
+  }
+  tag.append("Cloud projects"); row.append(tag);
+  const chips = el("div", { class: "chips" }); row.append(chips);
+  chips.append(el("span", { class: "hint" }, "Loading…"));
+  row.append(el("button", { class: "link", type: "button", onclick: openCloudSettings }, "Cloud settings"));
+  try {
+    const list = await gh(dataRoot());
+    cloudProjects = (Array.isArray(list) ? list : []).filter(e => e.type === "dir").map(e => e.name);
+    chips.textContent = "";
+    if (!cloudProjects.length) chips.append(el("span", { class: "hint" }, `No project folders in ${dataRoot() || "the repository"} yet. Add one on GitHub (see Help).`));
+    cloudProjects.forEach(n => chips.append(el("button", { class: "chip" + (project && project.cloud && project.name === n ? " on" : ""), type: "button", onclick: () => openCloudProject(n) }, n)));
+  } catch (e) { chips.textContent = ""; chips.append(el("span", { class: "hint", style: "color:var(--danger)" }, cloudError(e, dataRoot() || cloud.repo))); }
+}
+async function listCloudJson(dir, rel = "", depth = 0, out = []) {
+  const list = await gh(dir);
+  for (const e of list) {
+    if (e.type === "file" && /\.json$/i.test(e.name)) out.push({ name: e.name, path: rel + e.name, cloudPath: e.path, sha: e.sha });
+    else if (e.type === "dir" && depth < 2 && !e.name.startsWith(".")) await listCloudJson(e.path, rel + e.name + "/", depth + 1, out);
+  }
+  return out;
+}
+async function openCloudProject(name) {
+  if (changed.size && !isExample) { toast("Save or undo your changes first, then switch projects"); return; }
+  try {
+    $("projName").textContent = name; $("projPath").textContent = "Loading from the cloud…";
+    await setProject(name, `Cloud project in ${cloud.repo}. Save sends changes to the streamed app.`, await listCloudJson(join(dataRoot(), name)), true);
+    store.set("ued.cloud.last", name);
+    renderCloudRow();
+  } catch (e) { showError(cloudError(e, join(dataRoot(), name))); }
+}
+function openCloudSettings() {
+  // On GitHub Pages (owner.github.io/repo/) the repository is known, so artists only paste their key.
+  let guess = "";
+  try { const m = location.hostname.match(/^([\w-]+)\.github\.io$/i), seg = location.pathname.split("/").filter(Boolean)[0]; if (m && seg) guess = `${m[1]}/${seg}`; } catch {}
+  $("cRepo").value = cloud ? cloud.repo : guess; $("cBranch").value = cloud ? cloud.branch : "main";
+  $("cDir").value = cloud ? cloud.dir : "data"; $("cToken").value = cloud ? cloud.token : "";
+  $("cloudMsg").textContent = "The key stays in this browser only."; $("cloudMsg").style.color = "";
+  $("cloudOff").hidden = !cloud;
+  $("cloudModal").hidden = false; $("cRepo").focus();
+}
+$("cloudCancel").addEventListener("click", () => $("cloudModal").hidden = true);
+$("cloudOff").addEventListener("click", () => { cloud = null; store.del(CLOUD_KEY); $("cloudModal").hidden = true; renderCloudRow(); toast("Cloud disconnected"); });
+$("cloudForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const repo = $("cRepo").value.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/, "").replace(/\/+$/, "");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) { $("cloudMsg").textContent = "Write the repository as owner/name, for example studio/unreal-data."; $("cloudMsg").style.color = "var(--danger)"; return; }
+  const prev = cloud;
+  cloud = { repo, branch: $("cBranch").value.trim() || "main", dir: $("cDir").value.trim(), token: $("cToken").value.trim() };
+  $("cloudMsg").textContent = "Checking…"; $("cloudMsg").style.color = "";
+  try {
+    await gh(dataRoot());
+    store.set(CLOUD_KEY, JSON.stringify(cloud)); $("cloudModal").hidden = true; toast("Cloud connected"); renderCloudRow();
+  } catch (err) { $("cloudMsg").textContent = cloudError(err, dataRoot() || repo); $("cloudMsg").style.color = "var(--danger)"; cloud = prev; }
+});
+$("helpBtn").addEventListener("click", () => { $("helpModal").hidden = false; });
+$("helpClose").addEventListener("click", () => { $("helpModal").hidden = true; });
+
+/* ---------- boot ---------- */
+showReferenceCopies();
+showRecent();
+renderCloudRow().then(() => { const last = store.get("ued.cloud.last"); if (cloud && last && cloudProjects.includes(last)) openCloudProject(last); });
+if (canWriteBack) $("wbHint").hidden = false;
+try {
+  const d = JSON.parse(store.get(DRAFT_KEY) || "null");
+  if (d && d.data && !d.isExample) {
+    $("restoreText").textContent = `You have unsaved edits to ${d.fileName} from ${new Date(d.at).toLocaleString()}.`;
+    $("restoreBanner").hidden = false;
+    $("restoreBtn").onclick = () => {
+      load(d.original, d.fileName, { keepDraft: true });
+      data = JSON.parse(d.data); commit(); toast("Restored your edits");
+    };
+    $("restoreDismiss").onclick = () => { store.del(DRAFT_KEY); $("restoreBanner").hidden = true; };
+  }
+} catch {}
+
+if (window.claude && window.claude.use) {
+  window.claude.use("downloads").then(d => { downloads = d; }).catch(() => {});
+}
+})();
+</script>
+
+</body></html>
